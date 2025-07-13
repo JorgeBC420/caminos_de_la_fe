@@ -1,0 +1,4 @@
+- Crear sistema de inventario tipo grid con ranuras por tipo de equipo
+- Incorporar drag and drop para intercambio de items
+- Separar visualmente armas, armaduras, consumibles y legendarios
+- Añadir slots rápidos para pociones

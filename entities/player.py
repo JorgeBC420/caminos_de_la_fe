@@ -4,6 +4,9 @@ from data.factions import FACTIONS
 from data.config import GameConfig
 from systems.auto_combat import AutoCombatSystem
 from systems.faction_war import FactionWarClient
+from entities.enemy import Enemy
+from systems.stats import PlayerStats
+from systems.stats import PlayerStatsUI
 
 faction_war_client = FactionWarClient("https://tujuego.com/api")
 
@@ -21,6 +24,17 @@ class Player(Entity):
         self.attack_damage = 15
         self.attack_range = 2.5
         self.can_attack = True
+
+        # --- Sistema de estadísticas ---
+        self.stats = PlayerStats(
+            base_stats={'fuerza': 12, 'defensa': 8, 'velocidad': 10, 'inteligencia': 5},
+            item_bonuses={'fuerza': 2, 'defensa': 1},
+            horse_bonuses={'fuerza': 1, 'velocidad': 3}
+        )
+        self.gold = 100
+
+        # --- UI de estadísticas (opcional: solo si quieres mostrarla al crear el jugador) ---
+        # self.stats_ui = PlayerStatsUI(self)
 
         # --- Cámara ---
         camera.parent = self
@@ -64,13 +78,17 @@ class Player(Entity):
             if mouse.x > -0.3:
                 if self.can_attack:
                     self.attack()
-
+                    # Mostrar/ocultar la UI de stats con TAB
+                    if key == 'tab':
+                        if not hasattr(self, 'stats_ui') or self.stats_ui is None:
+                            self.stats_ui = PlayerStatsUI(self)
+                        self.stats_ui.enabled = not self.stats_ui.enabled
     def attack(self):
         self.can_attack = False
         invoke(setattr, self, 'can_attack', True, delay=0.8)
         self.animate_position(self.position + self.forward * 1, duration=0.1, curve=curve.linear)
         self.animate_position(self.position, duration=0.1, delay=0.1, curve=curve.linear)
-        from entities.enemy import Enemy
+
         for ent in scene.entities[:]:
             if isinstance(ent, Enemy) and distance(self, ent) < self.attack_range:
                 print(f"Golpeaste al enemigo! Daño: {self.attack_damage}")
