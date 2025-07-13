@@ -1,0 +1,7 @@
+ursina
+numpy
+rich
+loguru
+tinydb
+pydantic
+pydub
