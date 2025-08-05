@@ -15,6 +15,14 @@ class GameConfig:
     CAMERA_DISTANCE = 12
     CAMERA_HEIGHT = 10
     CAMERA_ANGLE = 30
+    XP_PER_ENEMY = 20
+    PLAYER_DAMAGE = 15
+    ENEMY_DAMAGE = 10
+    LOOT_DROP_CHANCE = 0.25
+    LEVEL_UP_XP = 100
+    INVENTORY_SIZE = 30
+    MAP_CENTER_COORDS = (0, 0)
+    GAME_STATES = ['menu', 'combat', 'paused', 'inventory', 'map']
 
     # Dificultad dinámica
     @staticmethod

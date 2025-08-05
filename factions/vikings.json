@@ -1,0 +1,10 @@
+{
+    "faction": "Vikings",
+    "advantages": {
+        "Cruzados": -10,
+        "Sarracenos": 20,
+        "Antiguos": 0
+    },
+    "skills": ["Berserker Rage", "Shield Wall", "Frost Axe"],
+    "equipment": ["Viking Helmet", "Viking Shield", "Frost Axe"]
+}

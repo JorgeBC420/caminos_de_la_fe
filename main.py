@@ -2,20 +2,48 @@ from ursina import *
 # CAMBIO: Importamos las escenas que vamos a gestionar
 from scenes.faction_selection import FactionSelectionScreen
 from scenes.combat_scene import CombatScene
+from scenes.profile_scene import ProfileScene
 from systems.lang_manager import _, lang_manager
 from systems.async_client import AsyncGameClient
 from systems.world_manager import WorldManager
+from quests.quest import Quest
+import json
 
 class Game:
+
     def __init__(self):
+        import data.config as config
+        from quests.quest import Quest
         self.app = Ursina(
             title="Caminos de la Fe: Cruzada y Conquista",
             borderless=False,
             fullscreen=False,
         )
         self.game_data = {'faction': None}
-        # CAMBIO: Añadimos un atributo para saber qué escena está activa
         self.current_scene = None
+        self.game_state = 'menu'
+        self.valid_states = config.GameConfig.GAME_STATES
+        self.active_quest = None
+
+    def assign_initial_quest(self):
+        if self.game_data['faction'] == 'Cruzados':
+            self.active_quest = Quest(
+                "La Plaga de los Susurros",
+                "Recolecta lágrimas de fénix",
+                {"collect": 5, "kill_enemies": 3},
+                "Cruzados",
+                {"xp": 200, "gold": 50}
+            )
+        # Puedes agregar más lógica para otras facciones
+
+    def set_game_state(self, state):
+        if state in self.valid_states:
+            self.game_state = state
+        else:
+            print(f"Estado de juego inválido: {state}")
+
+    def is_state(self, state):
+        return self.game_state == state
 
     def run(self):
         # Iniciar con la pantalla de selección de facción
@@ -48,6 +76,31 @@ class Game:
         window.color = color.hex('#82C5FF')
         # Creamos una instancia de CombatScene y la guardamos
         self.current_scene = CombatScene(game=self)
+
+    def save_game(self):
+        player_data = self.current_scene.player.save_state()
+        with open('save_game.json', 'w') as f:
+            json.dump(player_data, f, indent=4)
+        print("¡Juego guardado!")
+
+    def load_game(self):
+        try:
+            with open('save_game.json', 'r') as f:
+                player_data = json.load(f)
+            self.start_combat_scene()
+            self.current_scene.player.load_state(player_data)
+            print("¡Juego cargado!")
+        except FileNotFoundError:
+            print("No se encontró un archivo de guardado.")
+
+    def open_profile(self, player):
+        # Limpiar escena actual
+        for entity in scene.entities:
+            if entity not in [camera, camera.ui]:
+                destroy(entity)
+        # Crear nueva escena de perfil
+        profile_scene = ProfileScene(player)
+        profile_ui = ProfileUI(player)
 
 class GameWorld(Entity):
     def __init__(self, world_id):

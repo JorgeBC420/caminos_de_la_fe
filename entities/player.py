@@ -24,14 +24,29 @@ class Player(Entity):
         super().__init__(**kwargs)
         # --- Datos RPG ---
         self.faction = FACTIONS[faction_name]
-        self.model = 'cube'
+        try:
+            self.model = load_model('Soldado CRUZADO.fbx')
+        except Exception as e:
+            print(f"Error al cargar modelo Soldado CRUZADO.fbx: {e}")
+            self.model = 'cube'
         self.color = self.faction.color
         self.collider = 'box'
         self.scale = (1, 2, 1)  # Hacer al jugador más alto y visible
         self.speed = GameConfig.PLAYER_SPEED
         self.health = GameConfig.PLAYER_HEALTH
         self.max_health = GameConfig.PLAYER_HEALTH
-        self.attack_damage = 15
+        self.attack_damage = GameConfig.PLAYER_DAMAGE
+    def add_experience(self, amount):
+        self.experience += amount
+        print(f"Ganaste {amount} XP. Total: {self.experience}")
+        if self.experience >= self.experience_to_next_level:
+            self.level_up()
+
+    def level_up(self):
+        self.level += 1
+        self.experience = 0
+        self.experience_to_next_level = 100 * self.level
+        print(f"¡Subiste a nivel {self.level}!")
         self.attack_range = 2.5
         self.can_attack = True
 
@@ -50,9 +65,43 @@ class Player(Entity):
         self.on_ground = True
         
         # --- Sistema de experiencia ---
-        self.level = self.stats.stats['nivel']
+        self._level = self.stats.stats['nivel']
+        self._experience = 0
+
+        from systems.combat_system import calculate_damage
+        self.attack_damage = GameConfig.PLAYER_DAMAGE
+        self.calculate_damage = lambda defender: calculate_damage(self, defender)
+
+    @property
+    def level(self):
+        return self._level
+
+    @level.setter
+    def level(self, value):
+        self._level = value
+
+    @property
+    def experience(self):
+        return self._experience
+
+    @experience.setter
+    def experience(self, value):
+        self._experience = value
+
+    @property
+    def experience_to_next_level(self):
+        return 100 * self.level
+
+    def add_experience(self, amount):
+        self.experience += amount
+        print(f"Ganaste {amount} XP. Total: {self.experience}")
+        if self.experience >= self.experience_to_next_level:
+            self.level_up()
+
+    def level_up(self):
+        self.level += 1
         self.experience = 0
-        self.experience_to_next_level = 100 * self.level
+        print(f"¡Subiste a nivel {self.level}!")
         
         # --- Sistema de cámara en tercera persona ---
         self.camera_controller = ThirdPersonCamera(self)
