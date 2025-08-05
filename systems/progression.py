@@ -38,11 +38,13 @@ class ExperienceSystem:
         old_level = self.player.level
         self.player.level += 1
         self.player.stats.stats['nivel'] = self.player.level
-        
+        # Verifica desbloqueo de facciones avanzadas
+        if self.player.level == 50:
+            self.player.check_faction_unlock()
         # Recompensas por subir de nivel
-        self.player.gold += 50 * self.player.level  # Oro escalado
+        if hasattr(self.player, 'gold'):
+            self.player.gold += 50 * self.player.level  # Oro escalado
         stat_points = 3  # Puntos de estadística por nivel
-        
         # Aumentar stats automáticamente (balanceado por facción)
         if self.player.faction.name == 'Cruzados':
             self.player.stats.stats['fuerza'] += 1
@@ -55,22 +57,32 @@ class ExperienceSystem:
         elif self.player.faction.name == 'Antiguos':
             self.player.stats.stats['inteligencia'] += 2
             self.player.stats.stats['tecnica'] += 1
-        
         # Recalcular vida y maná máximos
         self.player.stats.max_health = self.player.stats.calculate_max_health()
         self.player.stats.max_mana = self.player.stats.calculate_max_mana()
-        
         # Restaurar vida y maná al subir de nivel
         self.player.health = self.player.stats.max_health
         self.player.mana = self.player.stats.max_mana
-        
         print(f"¡NIVEL {self.player.level}!")
         print(f"¡+{50 * self.player.level} oro!")
         print("¡Vida y maná restaurados!")
-        
         # Actualizar UI si existe
         if hasattr(self.player, 'stats_ui') and self.player.stats_ui:
             self.player.stats_ui.update_ui()
+
+def unlock_advanced_faction(player, faction_name):
+    """
+    Otorga habilidades y equipo avanzado al jugador al completar la misión de iniciación.
+    """
+    from items.advanced_gear import get_faction_gear
+    gear = get_faction_gear(faction_name)
+    player.advanced_gear = gear
+    # Añade las skills de la facción avanzada
+    from data.deity_data import DEITY_BONUSES
+    if faction_name in DEITY_BONUSES:
+        player.skills = player.skills if hasattr(player, 'skills') else []
+        player.skills.extend(DEITY_BONUSES[faction_name].get('skills', []))
+    print(f"¡Facción avanzada desbloqueada: {faction_name}!")
 
     def get_upgrade_cost(level):
         return (level + 1) ** 2

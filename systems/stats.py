@@ -39,10 +39,17 @@ class PlayerStats:
 
     def improve_stat(self, stat_name, amount=1):
         if stat_name in self.stats:
+            cost = (self.stats[stat_name] + 1) ** 2
+            if hasattr(self, 'gold') and self.gold < cost:
+                print(f"No tienes suficiente oro para mejorar {stat_name}. Costo: {cost}")
+                return False
             self.stats[stat_name] += amount
+            if hasattr(self, 'gold'):
+                self.gold -= cost
             if stat_name in ['nivel', 'resistencia', 'inteligencia']:
                 self.max_health = self.calculate_max_health()
                 self.max_mana = self.calculate_max_mana()
+            print(f"Mejoraste {stat_name} a {self.stats[stat_name]}. Oro restante: {getattr(self, 'gold', 0)}")
             return True
         return False
 
@@ -58,13 +65,17 @@ class PlayerStatsUI(Entity):
         self.text_elements = {}
         self.buttons = {}
 
+        self.selected_abilities = []  # Habilidades básicas seleccionadas
+        self.ability_buttons = {}
+        self.ultimate_label = None
         self.create_ui()
 
     def create_ui(self):
-        bg = Entity(parent=self, model='quad', scale=(0.5, 0.8), color=color.black66, position=(0, 0))
-        title = Text("Estadísticas del Personaje", parent=self, position=(-0.2, 0.35), scale=1.5)
+        bg = Entity(parent=self, model='quad', scale=(0.6, 1.0), color=color.black66, position=(0, 0))
+        title = Text("Estadísticas del Personaje", parent=self, position=(-0.2, 0.45), scale=1.5)
 
-        y_start = 0.25
+        # --- Stats ---
+        y_start = 0.35
         for i, stat in enumerate(self.stats.stats.keys()):
             y = y_start - i * 0.06
             base = self.stats.stats.get(stat, 0)
@@ -82,7 +93,6 @@ class PlayerStatsUI(Entity):
             )
             self.text_elements[stat] = label
 
-            # Botón con costo y color dinámico
             can_afford = self.gold >= cost
             btn = Button(
                 text=f"+ ({cost})",
@@ -96,7 +106,7 @@ class PlayerStatsUI(Entity):
             )
             self.buttons[stat] = btn
 
-        # Salud y maná máximos
+        # --- Salud, maná y oro ---
         self.hp_text = Text(
             text=f"Vida Máx: {self.stats.max_health}",
             parent=self,
@@ -116,6 +126,39 @@ class PlayerStatsUI(Entity):
             scale=0.9
         )
 
+        # --- Habilidades básicas (selección de 2 de 3) ---
+        ability_y = -0.05
+        faction = getattr(self.player, 'faction', None)
+        abilities = []
+        if faction and hasattr(faction, 'abilities'):
+            abilities = list(faction.abilities.values())
+        # Si no hay facción, usar ejemplo
+        if not abilities:
+            abilities = ['Habilidad 1', 'Habilidad 2', 'Habilidad 3']
+        Text("Selecciona 2 habilidades básicas:", parent=self, position=(-0.2, ability_y), scale=1.1)
+        for i, ab in enumerate(abilities):
+            ay = ability_y - (i+1)*0.06
+            btn = Button(
+                text=ab,
+                parent=self,
+                position=(0.0, ay),
+                scale=(0.22, 0.05),
+                color=color.azure if ab in self.selected_abilities else color.gray,
+                text_color=color.white,
+                on_click=lambda a=ab: self.toggle_ability(a)
+            )
+            self.ability_buttons[ab] = btn
+
+        # --- Ultimate ---
+        ultimate = getattr(faction, 'ultimate', 'Ultimate') if faction else 'Ultimate'
+        self.ultimate_label = Text(
+            text=f"Ultimate: {ultimate}",
+            parent=self,
+            position=(-0.2, -0.28),
+            scale=1.1,
+            color=color.gold
+        )
+
     def update_ui(self):
         for stat, label in self.text_elements.items():
             base = self.stats.stats.get(stat, 0)
@@ -125,7 +168,6 @@ class PlayerStatsUI(Entity):
                 label.text = f"{stat.capitalize()}: {base + bonus} (+{bonus})"
             else:
                 label.text = f"{stat.capitalize()}: {base}"
-            # Actualiza el botón: texto, color y habilitación
             btn = self.buttons[stat]
             btn.text = f"+ ({cost})"
             can_afford = self.gold >= cost
@@ -134,28 +176,32 @@ class PlayerStatsUI(Entity):
         self.hp_text.text = f"Vida Máx: {self.stats.max_health}"
         self.mp_text.text = f"Maná Máx: {self.stats.max_mana}"
         self.gold_text.text = f"Oro: {self.gold}"
+        # Actualiza botones de habilidades
+        for ab, btn in self.ability_buttons.items():
+            btn.color = color.azure if ab in self.selected_abilities else color.gray
+            btn.enabled = (ab in self.selected_abilities or len(self.selected_abilities) < 2)
+        # Ultimate
+        if self.ultimate_label:
+            faction = getattr(self.player, 'faction', None)
+            ultimate = getattr(faction, 'ultimate', 'Ultimate') if faction else 'Ultimate'
+            self.ultimate_label.text = f"Ultimate: {ultimate}"
 
     def increase_stat(self, stat_name):
         current_value = self.stats.stats.get(stat_name, 0)
-        cost = (current_value + 1) ** 2  # Costo cuadrático: (nivel+1)^2
+        cost = (current_value + 1) ** 2
         if self.gold >= cost:
             if self.stats.improve_stat(stat_name):
                 self.gold -= cost
             self.update_ui()
         else:
             print(f"No tienes suficiente oro para mejorar {stat_name}. Costo requerido: {cost}")
-        
-    def update_ui(self):
-        for stat, label in self.text_elements.items():
-            base = self.stats.stats.get(stat, 0)
-            bonus = self.stats.get_bonus(stat)
-            if bonus > 0:
-                label.text = f"{stat.capitalize()}: {base + bonus} (+{bonus})"
-            else:
-                label.text = f"{stat.capitalize()}: {base}"
-        self.hp_text.text = f"Vida Máx: {self.stats.max_health}"
-        self.mp_text.text = f"Maná Máx: {self.stats.max_mana}"
-        self.gold_text.text = f"Oro: {self.gold}"
+
+    def toggle_ability(self, ability_name):
+        if ability_name in self.selected_abilities:
+            self.selected_abilities.remove(ability_name)
+        elif len(self.selected_abilities) < 2:
+            self.selected_abilities.append(ability_name)
+        self.update_ui()
 
 # NOTAS:
 # - Cuando crees la lógica de ítems, actualiza item_bonuses en PlayerStats.
