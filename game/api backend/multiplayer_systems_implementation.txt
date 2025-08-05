@@ -1,0 +1,154 @@
+# Caminos de la Fe - Multiplayer Systems Implementation Checklist
+
+This file lists all the new modules, files, and directories required for transforming the single-player game into a connected multiplayer world with social and economic systems. These are to be created outside the backend folder, typically in the client-side Ursina project.
+
+---
+
+## Directory Structure
+
+caminos_de_la_fe/
+├─ client/
+│  ├─ data/
+│  │  ├─ brotherhood_config.py
+│  ├─ systems/
+│  │  ├─ brotherhood_manager.py
+│  │  ├─ pvp_manager.py
+│  │  ├─ market_manager.py
+│  │  ├─ chat_manager.py
+│  ├─ ui/
+│  │  ├─ brotherhood_ui.py
+│  │  ├─ home_ui.py
+│  │  ├─ pvp_ui.py
+│  │  ├─ chat_ui.py
+│  │  ├─ market_ui.py
+│  ├─ entities/
+│  │  ├─ player_home.py
+│  │  ├─ player.py          # Modificado
+├─ server/
+│  ├─ main.py
+│  ├─ database.py
+│  ├─ models/
+│  │  ├─ player.py
+│  │  ├─ brotherhood.py
+│  │  ├─ market.py
+
+---
+
+## New Modules to Implement (Client/Ursina)
+
+- data/brotherhood_config.py
+- systems/brotherhood_manager.py
+- systems/pvp_manager.py
+- systems/market_manager.py
+- systems/chat_manager.py
+- ui/brotherhood_ui.py
+- ui/home_ui.py
+- ui/pvp_ui.py
+- ui/chat_ui.py
+- ui/market_ui.py
+- entities/player_home.py
+- entities/player.py (modificado para integración)
+
+## Backend (Server/FastAPI)
+- main.py (WebSocket, API endpoints)
+- database.py
+- models/player.py
+- models/brotherhood.py
+- models/market.py
+
+---
+
+## Implementation Phases
+
+1. Local Systems: PlayerHome, HomeUI, local save, citadel UI
+2. Backend Mock: Fake API, BrotherhoodManager with mock data, BrotherhoodUI
+3. Real-Time Systems: ChatManager (WebSockets), PvPManager (simulated matchmaking), notifications
+4. Persistent Economy: MarketManager (real API), secure transactions, operation history
+5. Full Integration: Connect all systems to real backend, JWT security, analytics, monitoring
+
+---
+
+## Notes
+- All client modules should be implemented in the Ursina project, outside the backend folder.
+- Backend modules are for FastAPI and database models.
+- This checklist is for project management and onboarding.
+
+
+
+## Key Recommendations
+
+### Backend Technology Diagram
+```
+graph LR
+A[FastAPI] --> B[PostgreSQL]
+A --> C[Redis]
+A --> D[WebSockets]
+C --> E[Caché]
+D --> F[Chat en Tiempo Real]
+```
+
+### Security
+- Use JWT for authentication
+- Validate all client inputs
+- Implement rate limiting
+- Use HTTPS/WSS for secure communication
+
+### Optimization
+- Use caching for expensive operations (e.g., lru_cache in Python)
+    ```python
+    from functools import lru_cache
+
+    @lru_cache(maxsize=32)
+    def get_brotherhood_data(brotherhood_id):
+        # Expensive data access logic
+    ```
+
+### Monetization
+- Cosmetic shop for citadel/home
+- Premium faction changes
+- PvP season pass cards
+
+### Implementation Advice
+- Start with the Player Home/Citadel system (local, no backend dependency)
+- Use these recommendations for both client and backend modules
+
+---
+
+## Missing Systems & Features (from GDD and repo analysis)
+
+### Core Game Systems
+- Combat system: abilities, ultimate, damage, health, attack animations
+- Progression system: experience, levels, skill tree
+- Equipment & inventory: UI, equip weapons/armor, stat effects
+- Missions & NPCs: interactive dialogues, quest tracking
+- Brotherhoods: creation, management, hierarchy (General, Guardians), UI
+- Faction war (async): backend connection, results screen, rewards
+- Economy & market: gold, player-to-player transactions, market system
+- Game world & ambience: initial level design, NPC/enemy placement
+- Localization: full text translation
+- Optimization & debugging: performance, bug fixes
+
+### Suggested Improvements
+- Refactor code: separate logic/UI (MVC or ECS), centralize config
+- Save system: player progress, inventory, quests (pickle/SQLite)
+- Visual feedback: particles, effects, sounds
+- Enemy AI: patrol, chase, group attack
+- Weather & day/night system: immersion, affects gameplay
+
+### Sprint Implementation Plan
+1. Week 1: Combat & progression (damage, health, XP, 3 abilities/faction)
+2. Week 2: Inventory & NPCs (UI, simple dialogues)
+3. Week 3: Brotherhoods & war (creation screen, API connection)
+4. Week 4: Debug & polish (mobile/PC testing, critical bug fixes)
+
+---
+
+## Recommendations for Next Steps
+- Prioritize combat and progression systems for core gameplay
+- Implement inventory and NPC dialogue for player engagement
+- Develop brotherhood creation/management and connect to backend
+- Refactor codebase for maintainability (MVC/ECS)
+- Add save/load system for persistent progression
+- Enhance visual/audio feedback for immersion
+- Improve enemy AI and add weather/day-night cycles
+- Continue localization and optimize for target platforms
