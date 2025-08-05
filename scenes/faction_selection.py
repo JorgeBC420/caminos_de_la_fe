@@ -13,7 +13,7 @@ class FactionSelectionScreen(Entity):
         
         Button('Cruzados', color=color.gold, scale=(0.3, 0.1), y=0, on_click=lambda: self.select_faction('Cruzados'))
         Button('Sarracenos', color=color.green, scale=(0.3, 0.1), y=-0.15, on_click=lambda: self.select_faction('Sarracenos'))
-        Button('Antiguos', color=color.purple, scale=(0.3, 0.1), y=-0.3, on_click=lambda: self.select_faction('Antiguos'))
+        Button('Antiguos', color=color.magenta, scale=(0.3, 0.1), y=-0.3, on_click=lambda: self.select_faction('Antiguos'))
 
     def select_faction(self, faction_name):
         """Guarda la facción y le dice al controlador del juego que cambie de escena."""

@@ -23,7 +23,7 @@ FACTIONS = {
     ),
     'Antiguos': Faction(
         name='Antiguos',
-        color=color.purple,
+        color=color.magenta,
         abilities=['Manipulación de Sombras', 'Pacto Ancestral'],
         special_attack='Invocación del Dios Olvidado'
     )

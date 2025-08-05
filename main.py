@@ -2,6 +2,9 @@ from ursina import *
 # CAMBIO: Importamos las escenas que vamos a gestionar
 from scenes.faction_selection import FactionSelectionScreen
 from scenes.combat_scene import CombatScene
+from systems.lang_manager import _, lang_manager
+from systems.async_client import AsyncGameClient
+from systems.world_manager import WorldManager
 
 class Game:
     def __init__(self):
@@ -46,7 +49,39 @@ class Game:
         # Creamos una instancia de CombatScene y la guardamos
         self.current_scene = CombatScene(game=self)
 
+class GameWorld(Entity):
+    def __init__(self, world_id):
+        super().__init__()
+        self.world_id = world_id
+        self.async_client = AsyncGameClient()
+        self.world_manager = WorldManager()
+        self.player_data = {
+            "id": "player123",
+            "faction": "Cruzados",
+            "stats": {"fuerza": 10, "defensa": 8},
+            "equipment": {"arma": "Espada", "armadura": "Cota"}
+        }
+    def join_holy_war(self):
+        self.async_client.join_holy_war(
+            war_id="holy_war_2023",
+            player_data=self.player_data,
+            callback=self.on_war_result
+        )
+    def on_war_result(self, result):
+        print(_("war_result_message"))
+        self.show_battle_cinematic(result)
+    def show_battle_cinematic(self, result):
+        if result.get("victory", False):
+            print("Animación de victoria")
+        else:
+            print("Animación de derrota")
+    def switch_world(self, world_id):
+        self.world_manager.switch_world(world_id, self.player_data)
 
-if __name__ == '__main__':
-    juego = Game()
-    juego.run()
+# Ejemplo de uso
+if __name__ == "__main__":
+    app = Ursina()
+    game = GameWorld(world_id="holy_land")
+    game.join_holy_war()
+    game.switch_world("europe")
+    app.run()
