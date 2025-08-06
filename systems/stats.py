@@ -1,3 +1,61 @@
+    def get_war_stats(self, event_type='duel', nearby_enemies=0):
+        """
+        Devuelve stats balanceados para PvP masivo según el tipo de evento y enemigos cercanos.
+        event_type: 'duel', 'clan', 'massive'
+        nearby_enemies: cantidad de enemigos en área de 20m
+        """
+        base_stats = self.stats.copy()
+        bonus_factor = 1.0
+        duration_factor = 1.0
+        cooldown_factor = 1.0
+        # Ajuste por tipo de evento
+        if event_type == 'duel':
+            bonus_factor = 1.3
+            duration_factor = 1.0
+            cooldown_factor = 1.0
+        elif event_type == 'clan':
+            bonus_factor = 1.2
+            duration_factor = 0.8
+            cooldown_factor = 1.15
+        elif event_type == 'massive':
+            bonus_factor = 1.15
+            duration_factor = 0.65
+            cooldown_factor = 1.3
+        # Penalización por anti-dominación
+        if self.has_legendary_item:
+            penalty = 1 - (0.10 * (nearby_enemies // 5))
+            bonus_factor *= max(penalty, 0.5)  # No baja de 50%
+            # Aplica solo a stats clave
+            return {
+                'attack': int(base_stats.get('fuerza', 0) * bonus_factor),
+                'defense': int(base_stats.get('defensa', 0) * bonus_factor),
+                'cooldown': cooldown_factor,
+                'duration': duration_factor
+            }
+        # Si no tiene legendario, stats normales
+        return {
+            'attack': base_stats.get('fuerza', 0),
+            'defense': base_stats.get('defensa', 0),
+            'cooldown': 1.0,
+            'duration': 1.0
+        }
+    def set_legendary_pet(self, pet_name, faction_bonus=None):
+        self.legendary_pet = pet_name
+        # Si el jugador escoge mascota legendaria de otra facción, pierde el bonus especial
+        if faction_bonus and getattr(self, 'faction', None) and pet_name not in self.faction.legendary_pets:
+            self.faction_bonus_active = False
+            print(f"Has perdido el bonus especial de facción por elegir {pet_name}.")
+        else:
+            self.faction_bonus_active = True
+        # Actualiza stats si es necesario
+        self.update_stats_for_legendary_pet()
+
+    def update_stats_for_legendary_pet(self):
+        # Aplica penalización o bonus según la selección
+        if hasattr(self, 'faction_bonus_active') and not self.faction_bonus_active:
+            for stat in self.stats:
+                self.stats[stat] = int(self.stats[stat] * 0.95)  # Penalización -5%
+        # Si bonus activo, restaurar stats (puedes guardar stats originales si lo prefieres)
 from ursina import *
 
 # --- Lógica de estadísticas del jugador ---

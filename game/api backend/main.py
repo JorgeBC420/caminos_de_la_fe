@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from routes import users, inventory, pvp, missions, items, brotherhood, pet, stable, blacksmith, alchemist, tavern, coliseum, story
+from routes import users, inventory, pvp, missions, items, brotherhood, pet, stable, blacksmith, alchemist, tavern, coliseum, story, xp_curve
 
 app = FastAPI()
 
@@ -16,6 +16,7 @@ app.include_router(alchemist.router)
 app.include_router(tavern.router)
 app.include_router(coliseum.router)
 app.include_router(story.router)
+app.include_router(xp_curve.router)
 # Puedes agregar aquí los routers para establo, herrero, alquimista, taberna, coliseo, etc. Ejemplo:
 # from routes import stable, blacksmith, alchemist, tavern, coliseum
 # app.include_router(stable.router)

@@ -1,7 +1,7 @@
 
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from api.routes import pets_router, mounts_router, weapons_router, nursery_router, player_router
+from api.routes import pets_router, mounts_router, weapons_router, nursery_router, player_router, community_router
 
 app = FastAPI(title="Caminos de la Fe API")
 
@@ -19,6 +19,7 @@ app.include_router(mounts_router)
 app.include_router(weapons_router)
 app.include_router(nursery_router)
 app.include_router(player_router)
+app.include_router(community_router)
 
 @app.get("/ping")
 def ping():

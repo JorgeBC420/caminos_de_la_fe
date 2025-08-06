@@ -1,4 +1,5 @@
 from ursina import *
+from ursina import Button
 import json
 
 class MissionSelectionUI(Entity):
@@ -10,11 +11,17 @@ class MissionSelectionUI(Entity):
         self.load_missions()
 
     def load_missions(self):
-        try:
-            with open('client/data/missions/mission_1.json', 'r', encoding='utf-8') as f:
-                missions = json.load(f)
-        except Exception as e:
-            missions = []
+        missions = []
+        for fname in [
+            'client/data/missions/mission_tutorial.json',
+            'client/data/missions/mission_story.json',
+            'client/data/missions/mission_side.json'
+        ]:
+            try:
+                with open(fname, 'r', encoding='utf-8') as f:
+                    missions.extend(json.load(f))
+            except Exception:
+                pass
         y = 0.1
         for mission in missions:
             btn = Button(text=mission['name'], parent=self, position=(0,y), scale=(0.4,0.1), on_click=lambda m=mission: self.accept_mission(m))

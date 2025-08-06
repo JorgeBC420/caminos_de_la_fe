@@ -9,3 +9,7 @@ from .citadel import router as citadel_router
 from .missions import router as missions_router
 
 from .story import router as story_router
+
+from .xp import router as xp_router
+
+from .community import router as community_router
