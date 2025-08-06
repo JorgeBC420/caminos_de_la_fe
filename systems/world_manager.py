@@ -1,8 +1,8 @@
 class WorldManager:
     WORLDS = {
-        "europe": {"name": "Europa Medieval", "factions": ["Cruzados", "Sarracenos"]},
-        "holy_land": {"name": "Tierra Santa", "factions": ["Cruzados", "Sarracenos", "Antiguos"]},
-        "expansion1": {"name": "Reinos Nórdicos", "factions": ["Vikingos", "Antiguos"]}
+        "holy_land": {"name": "Tierra Santa", "factions": ["Antiguos", "Sarracenos", "Cruzados"]},
+        "expansion1": {"name": "Reinos del Nilo", "factions": ["Egipcios", "Romanos"]},
+        "expansion2": {"name": "Tierras Boreales", "factions": ["Vikingos", "Griegos"]},
     }
     def __init__(self):
         self.current_world = "holy_land"

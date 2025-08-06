@@ -62,3 +62,48 @@ DEITY_BONUSES = {
         ]
     }
 }
+
+DEITIES = {
+    'cruzado': [
+        {
+            'name': 'San Jorge, el Guerrero Santo',
+            'passive': '+20% resistencia a daño demoníaco',
+            'ultimate': 'Llama del Mártir',
+            'ultimate_desc': 'Gran cruz luminosa que quema enemigos y cura aliados.'
+        },
+        {
+            'name': 'Santa Lucía, la Guardiana de la Luz',
+            'passive': '+regeneración de maná',
+            'ultimate': 'Milagro de Luz',
+            'ultimate_desc': 'Cura masiva e invulnerabilidad temporal.'
+        }
+    ],
+    'sarraceno': [
+        {
+            'name': 'Djin del Viento Cortante',
+            'passive': '+velocidad de ataque',
+            'ultimate': 'Tornado de Arena',
+            'ultimate_desc': 'Daño en área, empuja enemigos.'
+        },
+        {
+            'name': 'Ifrit de las Sombras Ardientes',
+            'passive': '+probabilidad de crítico',
+            'ultimate': 'Fuego Interior',
+            'ultimate_desc': 'Explosión con efecto DoT (daño prolongado).'
+        }
+    ],
+    'antiguo': [
+        {
+            'name': 'Espíritu del Oso de Piedra',
+            'passive': '+vida máxima',
+            'ultimate': 'Pisotón del Guardián',
+            'ultimate_desc': 'Aturde en área y daña.'
+        },
+        {
+            'name': 'Árbol-Madre de los Bosques',
+            'passive': '+regeneración pasiva',
+            'ultimate': 'Llamado del Bosque',
+            'ultimate_desc': 'Invoca raíces para atrapar enemigos y curar aliados.'
+        }
+    ]
+}

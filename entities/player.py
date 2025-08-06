@@ -16,6 +16,8 @@ from systems.monetization import FaithPass
 from systems.events import EventSystem
 from api.client import APIClient
 import math
+import random
+from ursina import invoke, Entity, color
 
 faction_war_client = FactionWarClient("https://tujuego.com/api")
 
@@ -38,6 +40,22 @@ def create_test_object(position=(2,0,2)):
     return obj
 
 class Player(Entity):
+    def add_fragment(self, fragment_name, amount=1):
+        """Agrega fragmentos al inventario del jugador."""
+        if not hasattr(self, 'fragments'):
+            self.fragments = {}
+        if fragment_name in self.fragments:
+            self.fragments[fragment_name] += amount
+        else:
+            self.fragments[fragment_name] = amount
+        print(f"Fragmento '{fragment_name}' agregado. Total: {self.fragments[fragment_name]}")
+
+    def complete_epic_mission(self, mission):
+        """Otorga el fragmento de recompensa al completar una misión épica."""
+        reward = mission.get('reward')
+        if reward and 'Fragmento' in reward:
+            self.add_fragment(reward)
+        # Aquí se puede agregar lógica para recompensas legendarias, oro, etc.
     def get_available_skills(self):
         """Devuelve las habilidades básicas y secundarias disponibles para la UI según la facción"""
         if self.faction.name == 'Egipcios':
@@ -136,9 +154,10 @@ class Player(Entity):
             self.is_on_ground = True
         else:
             self.is_on_ground = False
-    def __init__(self, faction_name='Cruzados', joystick=None, **kwargs):
+    def __init__(self, faction_name='Cruzados', build=None, joystick=None, **kwargs):
         super().__init__(**kwargs)
-        # --- Datos RPG ---
+        from data.basic_abilities import BASIC_ABILITIES
+        from data.ultimate_abilities import ULTIMATE_ABILITIES
         self.faction = FACTIONS[faction_name]
         try:
             self.model = load_model('Soldado CRUZADO.fbx')
@@ -147,20 +166,29 @@ class Player(Entity):
             self.model = 'cube'
         self.color = self.faction.color
         self.collider = 'box'
-        self.scale = (1, 2, 1)  # Hacer al jugador más alto y visible
+        self.scale = (1, 2, 1)
         self.speed = GameConfig.PLAYER_SPEED
         self.health = GameConfig.PLAYER_HEALTH
         self.max_health = GameConfig.PLAYER_HEALTH
         self.attack_damage = GameConfig.PLAYER_DAMAGE
-        # --- Joystick Virtual ---
         self.joystick = joystick if joystick is not None else self.create_virtual_joystick()
-        # --- Física y polígono de pruebas ---
-        self.mass = 80  # kg
-        self.gravity = -9.8  # m/s^2
+        self.mass = 80
+        self.gravity = -9.8
         self.force = Vec3(0, 0, 0)
         self.velocity = Vec3(0, 0, 0)
         self.impact = 0
         self.is_on_ground = True
+        self.mp = getattr(self, 'mana', 100)
+        self.abilities = {}
+        # Registrar solo las habilidades seleccionadas del build
+        if build:
+            for ab in BASIC_ABILITIES.get(faction_name, []):
+                if ab['key'] in build['basics']:
+                    self.abilities[ab['key']] = {**ab, 'ready': True}
+            ult = ULTIMATE_ABILITIES.get(faction_name)
+            if ult and ult['key'] == build['ultimate']:
+                self.abilities[ult['key']] = {**ult, 'ready': True}
+        # ...existing code...
 
     def create_virtual_joystick(self):
         # Polígono simple para pruebas de joystick
@@ -391,20 +419,23 @@ class Player(Entity):
             print("Ya has reclamado tu recompensa diaria")
         print("===========================\n")
 
-    def use_ability(self, ability_name):
-        """Usar una habilidad específica"""
-        if ability_name in self.abilities and self.abilities[ability_name]['ready']:
-            if ability_name == 'basic_attack':
-                self.attack()
-            elif ability_name == 'ability1':
-                self.faction_ability_1()
-                self.quest_system.update_quest_progress('ability', 1)
-            elif ability_name == 'ability2':
-                self.faction_ability_2()
-                self.quest_system.update_quest_progress('ability', 1)
-            elif ability_name == 'ultimate':
-                self.ultimate_ability()
-                self.quest_system.update_quest_progress('ability', 1)
+    def use_ability(self, key):
+        data = self.abilities.get(key)
+        if not data or not data['ready'] or self.mp < data['cost_mp']:
+            print(f"No puedes usar {key}: cooldown o maná insuficiente.")
+            return
+        self.mp -= data['cost_mp']
+        data['ready'] = False
+        from ursina import invoke
+        invoke(setattr, data, 'ready', True, delay=data['cd'])
+        self.ultimate_charge = getattr(self, 'ultimate_charge', 0) + data.get('ult_charge', 0)
+        print(f"Usaste {data['name']} (key={key})")
+        # Aquí ejecutas el efecto real: daño, curas, control...
+        try:
+            from systems.combat import CombatSystem
+            CombatSystem.execute(self, key)
+        except Exception as e:
+            print(f"No se pudo ejecutar efecto de {key}: {e}")
                 
     def faction_ability_1(self):
         """Habilidad específica de facción 1"""
@@ -822,15 +853,55 @@ class Player(Entity):
 
     def get_enemies(self, radius=6):
         # Devuelve enemigos cercanos (placeholder)
-        return []  # Implementar lógica real
-        """Tormenta del desierto - ultimate de Sarracenos"""
-        print("¡TORMENTA DEL DESIERTO!")
-        # Implementar habilidad definitiva
-        
-    def time_manipulation(self):
-        """Manipulación temporal - ultimate de Antiguos"""
-        print("¡MANIPULACIÓN TEMPORAL!")
-        # Implementar habilidad definitiva
+        return []
+    
+    def activate_skill(self, skill_name):
+        if skill_name == 'Curación':
+            heal_amount = int(self.max_health * 0.25)
+            self.health = min(self.health + heal_amount, self.max_health)
+            print(f'Curación: +{heal_amount} HP')
+            # Efecto visual
+            Entity(model='sphere', color=color.lime, position=self.position, scale=0.5)
+        elif skill_name == 'Daño en área':
+            # Daño a todos los enemigos cercanos
+            for e in self.get_nearby_enemies():
+                e.health -= 20
+                print(f'Daño en área a {e}: -20 HP')
+                Entity(model='circle', color=color.red, position=e.position, scale=0.7)
+        elif skill_name == 'Invocación':
+            # Invoca un aliado temporal
+            ally = Entity(model='cube', color=color.azure, position=self.position + (2,0,0), scale=1)
+            print('Aliado invocado')
+            invoke(destroy, ally, delay=10)
+        elif skill_name == 'Ultimate':
+            if hasattr(self, 'moral') and self.moral >= 500:
+                print(f'Activando ultimate: {self.ultimate}')
+                self.moral -= 500
+                self.show_ultimate_effect()
+            else:
+                print('No tienes suficiente fe/moral para activar la ultimate.')
+
+    def get_nearby_enemies(self):
+        # Debes conectar esto con el sistema de combate real
+        return []
+
+    def show_ultimate_effect(self):
+        # Efectos visuales según la ultimate
+        if hasattr(self, 'ultimate'):
+            if self.ultimate == 'Llama del Mártir':
+                Entity(model='quad', color=color.orange, position=self.position + (0,2,0), scale=(2,2,2))
+            elif self.ultimate == 'Milagro de Luz':
+                Entity(model='sphere', color=color.white, position=self.position, scale=2)
+            elif self.ultimate == 'Tornado de Arena':
+                Entity(model='circle', color=color.yellow, position=self.position, scale=2)
+            elif self.ultimate == 'Fuego Interior':
+                Entity(model='sphere', color=color.red, position=self.position, scale=2)
+            elif self.ultimate == 'Pisotón del Guardián':
+                Entity(model='cube', color=color.brown, position=self.position, scale=2)
+            elif self.ultimate == 'Llamado del Bosque':
+                Entity(model='circle', color=color.green, position=self.position, scale=2)
+            print(f'Efecto visual de {self.ultimate}')
+    
     def attack(self):
         self.can_attack = False
         invoke(setattr, self, 'can_attack', True, delay=0.8)

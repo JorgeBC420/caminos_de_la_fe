@@ -1,5 +1,7 @@
+
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from api.routes import pets_router, mounts_router, weapons_router, nursery_router, player_router
 
 app = FastAPI(title="Caminos de la Fe API")
 
@@ -12,19 +14,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(pets_router)
+app.include_router(mounts_router)
+app.include_router(weapons_router)
+app.include_router(nursery_router)
+app.include_router(player_router)
+
 @app.get("/ping")
 def ping():
     return {"status": "ok"}
 
-# Endpoint de perfil de jugador
-@app.get("/profile/{player_id}")
-def get_profile(player_id: str):
-    # TODO: Integrar con sistema de jugadores
-    return {"player_id": player_id, "stats": {}, "faction": None}
-
-# Endpoint de facciones
-
-# Endpoint de facciones avanzadas según nivel
 @app.get("/factions/{player_level}")
 def get_factions(player_level: int):
     base_factions = ["cruzados", "sarracenos", "antiguos"]
@@ -33,13 +32,10 @@ def get_factions(player_level: int):
         return {"factions": base_factions + advanced_factions}
     return {"factions": base_factions}
 
-# Endpoint de localización
 @app.get("/localization/{lang}")
 def get_localization(lang: str):
     # TODO: Integrar con systems/lang_manager.py y archivos JSON
     return {"lang": lang, "strings": {}}
-
-# Puedes agregar más endpoints aquí
 
 if __name__ == "__main__":
     import uvicorn

@@ -1,3 +1,14 @@
+class CombatSystem:
+    @staticmethod
+    def execute(player, ability_key):
+        # Ejecuta el efecto real de la habilidad según su key
+        ability = player.abilities.get(ability_key)
+        if not ability:
+            print(f"Habilidad {ability_key} no encontrada.")
+            return
+        print(f"[Combate] {player.faction.name} usa {ability['name']}: {ability['description']}")
+        # Aquí puedes implementar la lógica real de daño, curación, control, etc.
+        # Ejemplo: if ability_key == 'hacha_errante': ...
 
 # Lógica de combate principal
 from data.deity_data import DEITY_BONUSES

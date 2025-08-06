@@ -6,7 +6,7 @@ from ursina import *
 class LanguageManager:
     _instance = None
     current_language = {}
-    SUPPORTED_LANGUAGES = ['es', 'en']
+    SUPPORTED_LANGUAGES = ['es', 'en', 'de', 'fr', 'it', 'pt', 'ar']
     DEFAULT_LANGUAGE = 'en'
 
     def __new__(cls):

@@ -1,0 +1,39 @@
+[
+  {
+    "name": "Defiende el Monasterio",
+    "type": "secundaria",
+    "required_level": 5,
+    "objectives": ["Derrota a todos los invasores"],
+    "enemies": ["Bandido", "Bandido", "Líder Bandido"],
+    "xp_reward": 100,
+    "loot": ["Espada de Hierro", "Poción de Salud"]
+  },
+  {
+    "name": "Purga en el Bosque Maldito",
+    "type": "secundaria",
+    "required_level": 7,
+    "objectives": ["Elimina 10 criaturas corrompidas"],
+    "enemies": ["Lobo Deforme", "Sombra Errante", "Árbol Maldito"],
+    "xp_reward": 500,
+    "loot": ["Poción de Resistencia", "Material de Forja"]
+  },
+  {
+    "name": "Rescate en las Ruinas",
+    "type": "secundaria",
+    "required_level": 11,
+    "objectives": ["Rescata a los aldeanos atrapados en las ruinas"],
+    "enemies": ["Esqueleto Animado", "Araña Gigante"],
+    "xp_reward": 700,
+    "loot": ["Llave Antigua", "Poción de Energía"]
+  },
+  {
+    "name": "Fragmentos de Poder",
+    "type": "secundaria",
+    "required_level": 15,
+    "objectives": ["Obtén fragmentos de arma legendaria en misiones especiales"],
+    "enemies": ["Bestia Guardiana", "Sicario de Élite"],
+    "lore": "Solo los más fuertes pueden reunir los fragmentos necesarios para forjar el arma legendaria.",
+    "xp_reward": 1000,
+    "loot": ["Fragmento de Arma Legendaria", "Material de Forja Avanzado"]
+  }
+]

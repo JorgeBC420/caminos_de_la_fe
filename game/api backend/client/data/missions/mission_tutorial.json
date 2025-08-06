@@ -1,0 +1,36 @@
+[
+  {
+    "name": "El Comienzo del Camino",
+    "type": "tutorial",
+    "objectives": ["Completa el entrenamiento básico", "Selecciona tu facción"],
+    "lore": "Narración sobre el mundo, la plaga y tu nacimiento en la guerra.",
+    "xp_reward": 10,
+    "loot": []
+  },
+  {
+    "name": "El Primer Encargo",
+    "type": "tutorial",
+    "objectives": ["Recolecta hierbas curativas para el herborista"],
+    "enemies": ["Lobo", "Rata", "Jabalí"],
+    "lore": "Aprende a moverte, interactuar y recoger ítems. Primeros combates si exploras.",
+    "xp_reward": 10,
+    "loot": ["Espada Oxidada", "Bastón Básico"]
+  },
+  {
+    "name": "Armados para el deber",
+    "type": "tutorial",
+    "objectives": ["Recibe tu equipo básico en la armería"],
+    "lore": "Aprende a equipar ítems y revisar atributos. Se introduce entrenamiento de estadísticas.",
+    "xp_reward": 10,
+    "loot": ["Escudo de Madera", "Casco de Cuero"]
+  },
+  {
+    "name": "Caza de Criaturas Alteradas",
+    "type": "tutorial",
+    "objectives": ["Elimina 5 bestias corrompidas del bosque"],
+    "enemies": ["Lobo Deforme", "Jabalí Rabioso"],
+    "lore": "Introducción a la plaga. Combate más serio, posible ayuda de un NPC.",
+    "xp_reward": 20,
+    "loot": ["Poción Curativa"]
+  }
+]

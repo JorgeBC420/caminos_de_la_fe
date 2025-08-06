@@ -1,3 +1,24 @@
+from game.mission_system import MissionSystem
+
+# Ejemplo: mostrar narrativa y diálogos de la misión 1 del Acto II
+mission = MissionSystem(act='act2', chapter_idx=0)
+mission.show_intro()
+# ... aquí iría la lógica de combate/calabozo ...
+# Si hay NPC relevante, mostrar diálogo
+mission = MissionSystem(act='act2', chapter_idx=1)
+mission.show_dialogue('kareem')
+# ... lógica de misión ...
+# Al finalizar la misión
+mission.show_outro()
+from game.mission_manager import MissionManager
+
+# Suponiendo que la facción se elige antes
+faccion = 'Vikingos'  # Cambia según la selección del jugador
+manager = MissionManager(faccion)
+manager.start_next_mission()
+
+# Al completar cada misión, llama:
+# manager.complete_mission()
 from ursina import *
 # CAMBIO: Importamos las escenas que vamos a gestionar
 from scenes.faction_selection import FactionSelectionScreen
@@ -7,6 +28,9 @@ from systems.lang_manager import _, lang_manager
 from systems.async_client import AsyncGameClient
 from systems.world_manager import WorldManager
 from quests.quest import Quest
+from ui.deity_selection_ui import DeitySelectionUI
+from systems.reputation_manager import ReputationManager
+from scenes.siege_scene import SiegeScene
 import json
 
 class Game:
@@ -131,6 +155,33 @@ class GameWorld(Entity):
     def switch_world(self, world_id):
         self.world_manager.switch_world(world_id, self.player_data)
 
+selected_faction = None
+selected_deity = None
+player = None
+reputation_manager = None
+
+def select_faction(faction_name):
+    global selected_faction, selection_menu_items
+    selected_faction = faction_name
+    print(f"Faccion seleccionada: {selected_faction}")
+    for item in selection_menu_items:
+        item.disable()
+    # Selección de deidad tras elegir facción
+    DeitySelectionUI(faction_name, on_select=select_deity)
+
+def select_deity(deity):
+    global selected_deity, player, reputation_manager
+    selected_deity = deity
+    print(f"Deidad seleccionada: {deity['name']}")
+    # Inicializa reputación y jugador
+    reputation_manager = ReputationManager(player)
+    player.deity = deity
+    player.passive = deity['passive']
+    player.ultimate = deity['ultimate']
+    player.ultimate_desc = deity['ultimate_desc']
+    player.moral = 0  # Moral/fe inicial
+    start_combat_scene()
+
 # Ejemplo de uso
 if __name__ == "__main__":
     app = Ursina()
@@ -138,3 +189,44 @@ if __name__ == "__main__":
     game.join_holy_war()
     game.switch_world("europe")
     app.run()
+
+# En la UI de combate, solo permite activar ultimate si player.moral >= 500
+# Ejemplo de lógica para el botón de ultimate:
+def activate_ultimate():
+
+# Lógica para completar misión épica y otorgar fragmentos
+def complete_epic_mission(mission):
+    global player
+    player.complete_epic_mission(mission)
+    print(f"Has completado la misión épica: {mission['name']} y recibido {mission['reward']}")
+    global player
+    if player.moral >= 500:
+        print(f"Activando ultimate: {player.ultimate}")
+        # Aquí iría la animación y efecto visual
+        invoke(show_ultimate_effect, player.ultimate)
+        player.moral -= 500  # Consume moral/fe
+    else:
+        print("No tienes suficiente fe/moral para activar la ultimate.")
+
+def show_ultimate_effect(ultimate_name):
+    # Aquí puedes crear entidades visuales y efectos según el ultimate
+    print(f"Efecto visual de {ultimate_name}")
+
+def show_combat_ui():
+    global player_health_bar, enemy_health_bar, ability_buttons
+    # ...existing code...
+    ability_buttons = []
+    skill_names = ['Curación', 'Daño en área', 'Ultimate']
+    default_font = 'VeraMono.ttf'  # Usa una fuente estándar de Ursina
+    for i, skill in enumerate(skill_names):
+        btn = Button(
+            text=skill if i < 2 else 'Ultimate',
+            y=-0.4,
+            x=0.3 + i * 0.2,
+            scale=(0.15, 0.08),
+            color=color.gray if i < 2 else color.orange,
+            font=default_font,
+            on_click=Func(player.activate_skill, skill)
+        )
+        ability_buttons.append(btn)
+    # ...existing code...

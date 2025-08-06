@@ -1,7 +1,10 @@
+"""
+Este archivo ha sido migrado. Usar schemas/brotherhood.py para las definiciones de hermandad.
+"""
 from pydantic import BaseModel
 from typing import Optional, List
 
-class ClanBase(BaseModel):
+class BrotherhoodBase(BaseModel):
     name: str
     description: Optional[str] = None
     general_id: Optional[int] = None
@@ -11,10 +14,10 @@ class ClanBase(BaseModel):
     members: Optional[List[int]] = []
     pending_invitations: Optional[List[int]] = []
 
-class ClanCreate(ClanBase):
+class BrotherhoodCreate(BrotherhoodBase):
     pass
 
-class ClanOut(ClanBase):
+class BrotherhoodOut(BrotherhoodBase):
     id: int
     leader_id: int
     members: Optional[List[int]] = []

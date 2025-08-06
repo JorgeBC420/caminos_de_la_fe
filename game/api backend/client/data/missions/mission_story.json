@@ -1,0 +1,79 @@
+[
+  {
+    "name": "Lo que ocultan las heridas",
+    "type": "historia",
+    "capitulo": 1,
+    "semana": 1,
+    "required_level": 3,
+    "objectives": ["Entrega partes de las criaturas al herborista"],
+    "lore": "Perspectiva y elección moral según tu facción. Desbloqueo de habilidad definitiva.",
+    "xp_reward": 90,
+    "loot": ["Desbloqueo Ultimate"]
+  },
+  {
+    "name": "El Asedio del Bastión Norte",
+    "type": "historia",
+    "capitulo": 2,
+    "semana": 1,
+    "required_level": 7,
+    "objectives": ["Defiende el bastión contra oleadas de enemigos"],
+    "lore": "La amenaza crece al norte. Debes resistir junto a tu hermandad.",
+    "xp_reward": 490,
+    "loot": ["Armadura de Bastión", "Llave de Reliquia"]
+  },
+  {
+    "name": "La Sombra sobre el Valle",
+    "type": "historia",
+    "capitulo": 3,
+    "semana": 2,
+    "required_level": 11,
+    "objectives": ["Investiga la aparición de criaturas oscuras en el valle"],
+    "lore": "El tercer día trae una amenaza desconocida. El valle está envuelto en oscuridad.",
+    "xp_reward": 1210,
+    "loot": ["Amuleto de Luz", "Fragmento de Sombra"]
+  },
+  {
+    "name": "El Despertar de la Reliquia",
+    "type": "historia",
+    "capitulo": 4,
+    "semana": 2,
+    "required_level": 15,
+    "objectives": ["Descubre el origen de la plaga y la leyenda de la reliquia"],
+    "lore": "El cuarto día revela secretos ancestrales y el inicio de la búsqueda de la reliquia legendaria.",
+    "xp_reward": 2250,
+    "loot": ["Fragmento de Reliquia", "Mapa Secreto"]
+  },
+  {
+    "name": "El Legado de la Disonancia",
+    "type": "historia",
+    "capitulo": 5,
+    "semana": 3,
+    "required_level": 45,
+    "objectives": ["Enfrenta la rebelión de Lord Valerius y la Orden del Silencio"],
+    "lore": "La paz es frágil y las viejas heridas supuran. La Disonancia usa la ambición humana.",
+    "xp_reward": 20250,
+    "loot": ["Título de Valerius", "Aquila de la Legión"]
+  },
+  {
+    "name": "El Despertar de la Legión",
+    "type": "historia",
+    "capitulo": 6,
+    "semana": 3,
+    "required_level": 55,
+    "objectives": ["Defiende el continente contra la Legión Aeterna"],
+    "lore": "El orden contra la libertad. La Legión avanza con disciplina y acero.",
+    "xp_reward": 30250,
+    "loot": ["Armadura Pretoriana", "Medalla de la Paz"]
+  },
+  {
+    "name": "El Secreto de las Arenas",
+    "type": "historia",
+    "capitulo": 7,
+    "semana": 4,
+    "required_level": 65,
+    "objectives": ["Enfrenta el despertar de los Hijos de Anubis y la tormenta de momias"],
+    "lore": "El despertar de un poder antiguo y el terror de lo inevitable.",
+    "xp_reward": 42250,
+    "loot": ["Reliquia de Anubis", "Trofeo de la Tormenta"]
+  }
+]

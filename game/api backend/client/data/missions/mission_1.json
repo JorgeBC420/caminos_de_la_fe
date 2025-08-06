@@ -1,0 +1,140 @@
+[
+  {
+    "name": "El Comienzo del Camino",
+    "type": "historia",
+    "objectives": ["Completa el entrenamiento básico", "Selecciona tu facción"],
+    "lore": "Narración sobre el mundo, la plaga y tu nacimiento en la guerra.",
+    "xp_reward": 0,
+    "loot": []
+  },
+  {
+    "name": "El Primer Encargo",
+    "type": "entrenamiento",
+    "objectives": ["Recolecta hierbas curativas para el herborista"],
+    "enemies": ["Lobo", "Rata", "Jabalí"],
+    "lore": "Aprende a moverte, interactuar y recoger ítems. Primeros combates si exploras.",
+    "xp_reward": 200,
+    "loot": ["Espada Oxidada", "Bastón Básico"]
+  },
+  {
+    "name": "Armados para el deber",
+    "type": "entrenamiento",
+    "objectives": ["Recibe tu equipo básico en la armería"],
+    "lore": "Aprende a equipar ítems y revisar atributos. Se introduce entrenamiento de estadísticas.",
+    "xp_reward": 100,
+    "loot": ["Escudo de Madera", "Casco de Cuero"]
+  },
+  {
+    "name": "Caza de Criaturas Alteradas",
+    "type": "entrenamiento",
+    "objectives": ["Elimina 5 bestias corrompidas del bosque"],
+    "enemies": ["Lobo Deforme", "Jabalí Rabioso"],
+    "lore": "Introducción a la plaga. Combate más serio, posible ayuda de un NPC.",
+    "xp_reward": 400,
+    "loot": ["Poción Curativa"]
+  },
+  {
+    "name": "Lo que ocultan las heridas",
+    "type": "historia",
+    "objectives": ["Entrega partes de las criaturas al herborista"],
+    "lore": "Perspectiva y elección moral según tu facción. Desbloqueo de habilidad definitiva.",
+    "xp_reward": 250,
+    "loot": ["Desbloqueo Ultimate"]
+  },
+  {
+    "name": "Defiende el Monasterio",
+    "type": "secundaria",
+    "objectives": ["Derrota a todos los invasores"],
+    "enemies": ["Bandido", "Bandido", "Líder Bandido"],
+    "xp_reward": 100,
+    "loot": ["Espada de Hierro", "Poción de Salud"]
+  },
+  {
+    "name": "El Asedio del Bastión Norte",
+    "type": "historia",
+    "required_level": 7,
+    "required_day": 2,
+    "objectives": ["Defiende el bastión contra oleadas de enemigos"],
+    "enemies": ["Sicario Sarraceno", "Bestia Corrompida", "Capitán de Asedio"],
+    "lore": "La amenaza crece al norte. Debes resistir junto a tu hermandad.",
+    "xp_reward": 600,
+    "loot": ["Armadura de Bastión", "Llave de Reliquia"]
+  },
+  {
+    "name": "Purga en el Bosque Maldito",
+    "type": "secundaria",
+    "required_level": 7,
+    "required_day": 2,
+    "objectives": ["Elimina 10 criaturas corrompidas"],
+    "enemies": ["Lobo Deforme", "Sombra Errante", "Árbol Maldito"],
+    "lore": "El bosque está perdido. Solo los valientes se atreven a entrar.",
+    "xp_reward": 500,
+    "loot": ["Poción de Resistencia", "Material de Forja"]
+  },
+  {
+    "name": "El Reto del Mentor",
+    "type": "entrenamiento",
+    "required_level": 7,
+    "required_day": 2,
+    "objectives": ["Supera la prueba de tu mentor en combate"],
+    "enemies": ["Mentor"],
+    "lore": "Solo los dignos pueden avanzar. Demuestra tu poder y sabiduría.",
+    "xp_reward": 400,
+    "loot": ["Insignia de Honor", "Mejora de Ultimate"]
+  },
+  {
+    "name": "La Sombra sobre el Valle",
+    "type": "historia",
+    "required_level": 11,
+    "required_day": 3,
+    "objectives": ["Investiga la aparición de criaturas oscuras en el valle"],
+    "enemies": ["Sombra Mayor", "Bestia de la Niebla", "Cultista"],
+    "lore": "El tercer día trae una amenaza desconocida. El valle está envuelto en oscuridad.",
+    "xp_reward": 900,
+    "loot": ["Amuleto de Luz", "Fragmento de Sombra"]
+  },
+  {
+    "name": "Rescate en las Ruinas",
+    "type": "secundaria",
+    "required_level": 11,
+    "required_day": 3,
+    "objectives": ["Rescata a los aldeanos atrapados en las ruinas"],
+    "enemies": ["Esqueleto Animado", "Araña Gigante"],
+    "lore": "Las ruinas antiguas esconden peligros y secretos. El rescate es urgente.",
+    "xp_reward": 700,
+    "loot": ["Llave Antigua", "Poción de Energía"]
+  },
+  {
+    "name": "Duelo de Campeones",
+    "type": "entrenamiento",
+    "required_level": 11,
+    "required_day": 3,
+    "objectives": ["Enfréntate al campeón de otra facción en combate"],
+    "enemies": ["Campeón Cruzado", "Campeón Sarraceno", "Campeón Antiguo"],
+    "lore": "Solo los mejores pueden aspirar a la gloria. El duelo decidirá el destino de muchos.",
+    "xp_reward": 800,
+    "loot": ["Medalla de Campeón", "Mejora de Ultimate"]
+  },
+  {
+    "name": "El Despertar de la Reliquia",
+    "type": "historia",
+    "required_level": 15,
+    "required_day": 4,
+    "objectives": ["Descubre el origen de la plaga y la leyenda de la reliquia"],
+    "enemies": ["Avatar de la Plaga", "Guardián Antiguo"],
+    "lore": "El cuarto día revela secretos ancestrales y el inicio de la búsqueda de la reliquia legendaria.",
+    "xp_reward": 1200,
+    "loot": ["Fragmento de Reliquia", "Mapa Secreto"]
+  },
+  {
+    "name": "Fragmentos de Poder",
+    "type": "secundaria",
+    "required_level": 15,
+    "required_day": 4,
+    "objectives": ["Obtén fragmentos de arma legendaria en misiones especiales"],
+    "enemies": ["Bestia Guardiana", "Sicario de Élite"],
+    "lore": "Solo los más fuertes pueden reunir los fragmentos necesarios para forjar el arma legendaria.",
+    "xp_reward": 1000,
+    "loot": ["Fragmento de Arma Legendaria", "Material de Forja Avanzado"]
+  }
+]
