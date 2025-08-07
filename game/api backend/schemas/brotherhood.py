@@ -42,3 +42,7 @@ class BrotherhoodSchema(BaseModel):
     legendary_weapon: str | None
     legendary_item: str | None
     # ...otros campos para expansión...
+
+    def __init__(self, name, members):
+        self.name = name
+        self.members = members

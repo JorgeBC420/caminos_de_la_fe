@@ -20,6 +20,7 @@ manager.start_next_mission()
 # Al completar cada misión, llama:
 # manager.complete_mission()
 from ursina import *
+
 # CAMBIO: Importamos las escenas que vamos a gestionar
 from scenes.faction_selection import FactionSelectionScreen
 from scenes.combat_scene import CombatScene
@@ -31,7 +32,13 @@ from quests.quest import Quest
 from ui.deity_selection_ui import DeitySelectionUI
 from systems.reputation_manager import ReputationManager
 from scenes.siege_scene import SiegeScene
+from core.ui_manager import UIManager
 import json
+from ui.profile_ui import ProfileUI
+from ui.event_end_ui import EventEndUI
+# Ejemplo: cómo disparar la conversión desde la UI al finalizar un evento
+def finalizar_evento_y_convertir(player, event_name):
+    EventEndUI(player, event_name)
 
 class Game:
 
@@ -39,26 +46,116 @@ class Game:
         import data.config as config
         from quests.quest import Quest
         self.app = Ursina(
-            title="Caminos de la Fe: Cruzada y Conquista",
+            title=_("Paths of Faith: Crusade and Conquest"),
             borderless=False,
             fullscreen=False,
         )
-        self.game_data = {'faction': None}
-        self.current_scene = None
-        self.game_state = 'menu'
-        self.valid_states = config.GameConfig.GAME_STATES
-        self.active_quest = None
+        self.ui_manager = UIManager(game_manager=self, player=None)
+        self.background_entity = None
+        self.player_entity = None
+        self.current_section = 'home'
+        self.section_backgrounds = {
+            'home': 'assets/home/home.png',
+            'ciudadela': 'assets/ciudadela/ciudadela.png',
+            'hermandad': 'assets/fortaleza/fortaleza.png',
+            'pvp_guerrahermandades': 'assets/guerrahermandades/guerrahermandades.png',
+            'pvp_guerradelafe': 'assets/guerradelafe/guerradelafe.png',
+            'misiones': 'assets/missions/missions.png',
+        }
+
+        # Barra de navegación inferior
+        self.nav_buttons = []
+        nav_data = [
+            ("Perfil", self.on_home_click),
+            ("Ciudadela", self.on_ciudadela_click),
+            ("Hermandad", self.on_hermandad_click),
+            ("PvP Hermandades", self.on_pvp_guerrahermandades_click),
+            ("PvP Fe", self.on_pvp_guerradelafe_click),
+            ("Misiones", self.on_misiones_click),
+        ]
+        for i, (label, callback) in enumerate(nav_data):
+            btn = Button(
+                text=label,
+                parent=camera.ui,
+                scale=(0.18, 0.07),
+                position=(-0.7 + i*0.28, -0.48),
+                color=color.dark_gray,
+                highlight_color=color.azure,
+                pressed_color=color.orange,
+                on_click=callback
+            )
+            self.nav_buttons.append(btn)
+
+    def show_section(self, section):
+        """Cambia el fondo y muestra el modelo del jugador en modo idle."""
+        self.current_section = section
+        # Eliminar fondo anterior
+        if self.background_entity:
+            destroy(self.background_entity)
+        # Cargar nuevo fondo
+        bg_path = self.section_backgrounds.get(section, 'assets/home/home.png')
+        self.background_entity = Entity(
+            parent=camera.ui,
+            model='quad',
+            texture=bg_path,
+            scale=(2, 1.2),
+            z=1
+        )
+        # Eliminar modelo anterior del jugador
+        if self.player_entity:
+            destroy(self.player_entity)
+        # Cargar modelo poligonal del jugador en modo idle (ejemplo: Soldado CRUZADO.fbx)
+        # Aquí puedes personalizar según la clase/facción del jugador
+        player_model = getattr(self, 'player', None)
+        model_path = 'Soldado CRUZADO.fbx' if not player_model else player_model.model_path
+        self.player_entity = Entity(
+            parent=camera.ui,
+            model=model_path,
+            scale=0.12,
+            position=(0, -0.25, -0.5),
+            rotation=(0, 180, 0),
+            z=0.5
+        )
+        # Aquí puedes añadir animación idle si el modelo lo soporta
+
+    # Métodos para los botones inferiores
+    def on_home_click(self):
+        self.show_section('home')
+
+    def on_ciudadela_click(self):
+        self.show_section('ciudadela')
+
+    def on_hermandad_click(self):
+        self.show_section('hermandad')
+
+    def on_pvp_guerrahermandades_click(self):
+        self.show_section('pvp_guerrahermandades')
+
+    def on_pvp_guerradelafe_click(self):
+        self.show_section('pvp_guerradelafe')
+
+    def on_misiones_click(self):
+        self.show_section('misiones')
 
     def assign_initial_quest(self):
-        if self.game_data['faction'] == 'Cruzados':
-            self.active_quest = Quest(
-                "La Plaga de los Susurros",
-                "Recolecta lágrimas de fénix",
-                {"collect": 5, "kill_enemies": 3},
-                "Cruzados",
-                {"xp": 200, "gold": 50}
-            )
-        # Puedes agregar más lógica para otras facciones
+        # Actualización de la misión inicial para el tutorial
+        self.active_quest = Quest(
+            "Tutorial: Primeros Pasos",
+            "Aprende los conceptos básicos del juego",
+            {"collect": 1, "interact": 1},
+            "General",
+            {"xp": 50, "gold": 10}
+        )
+
+    def assign_fragment_quest(self):
+        # Agregar misión de fragmentos de armas legendarias
+        self.active_quest = Quest(
+            "Fragmentos Perdidos",
+            "Recolecta fragmentos de armas legendarias",
+            {"collect": 3, "explore": 2},
+            "General",
+            {"xp": 300, "gold": 100}
+        )
 
     def set_game_state(self, state):
         if state in self.valid_states:
@@ -85,21 +182,14 @@ class Game:
         window.color = color.dark_gray
         # Creamos una instancia de FactionSelectionScreen y la guardamos
         self.current_scene = FactionSelectionScreen(game=self)
+        
+        # Ejemplo de uso del UIManager
+        self.ui_manager.show_profile()
 
     # CAMBIO: Añadimos el método para iniciar la escena de combate
-    def start_combat_scene(self):
-        """Limpia la escena actual e inicia la escena de combate."""
+    def start_combat_scene():
         print("Iniciando escena de combate...")
-        
-        # La escena de selección de facción limpia sus propios botones al hacer clic.
-        # Nos aseguramos de limpiar cualquier remanente por si acaso.
-        for entity in scene.entities:
-            if isinstance(entity, (Button, Text)):
-                destroy(entity)
-
-        window.color = color.hex('#82C5FF')
-        # Creamos una instancia de CombatScene y la guardamos
-        self.current_scene = CombatScene(game=self)
+        # Aquí iría la lógica para iniciar la escena de combate
 
     def save_game(self):
         player_data = self.current_scene.player.save_state()
@@ -193,6 +283,21 @@ if __name__ == "__main__":
 # En la UI de combate, solo permite activar ultimate si player.moral >= 500
 # Ejemplo de lógica para el botón de ultimate:
 def activate_ultimate():
+
+# Corrección de la función `complete_epic_mission`
+def complete_epic_mission(mission):
+    print(f"Completando misión épica: {mission}")
+    # Lógica para completar la misión épica
+    if hasattr(mission, 'complete'):
+        mission.complete()
+        print(f"Misión {mission.name} completada con éxito.")
+    else:
+        print("Error: La misión no tiene un método 'complete'.")
+# Definición de `start_combat_scene` para evitar errores
+
+def start_combat_scene():
+    print("Iniciando escena de combate...")
+    # Aquí iría la lógica para iniciar la escena de combate
 
 # Lógica para completar misión épica y otorgar fragmentos
 def complete_epic_mission(mission):

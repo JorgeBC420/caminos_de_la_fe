@@ -24,3 +24,8 @@ class Brotherhood(Base):
     legendary_weapon = Column(String, default=None)
     legendary_item = Column(String, default=None)
     # ...otros campos para expansión...
+
+class BrotherhoodModel:
+    def __init__(self, name, members):
+        self.name = name
+        self.members = members

@@ -2,6 +2,11 @@ from ursina import *
 
 class ProfileScene(Entity):
     def __init__(self, player):
+        """Initialize the ProfileScene with the player's data.
+
+        Args:
+            player: The player entity containing model and texture information.
+        """
         super().__init__()
         self.player = player
         # Entorno 3D
@@ -23,6 +28,8 @@ class ProfileScene(Entity):
         self.camera.parent = self.camera_pivot
         self.camera_pivot.position = (0, 2, -5)
         self.camera_pivot.rotation_x = 15
+        self.camera_pivot.rotation_y = 0
+        self.camera_pivot.rotation_z = 0
 
     def load_home(self):
         home_level = getattr(self.player, 'home_level', 1)

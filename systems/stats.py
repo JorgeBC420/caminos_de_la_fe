@@ -1,4 +1,4 @@
-    def get_war_stats(self, event_type='duel', nearby_enemies=0):
+def get_war_stats(self, event_type='duel', nearby_enemies=0):
         """
         Devuelve stats balanceados para PvP masivo según el tipo de evento y enemigos cercanos.
         event_type: 'duel', 'clan', 'massive'
@@ -47,7 +47,6 @@
             print(f"Has perdido el bonus especial de facción por elegir {pet_name}.")
         else:
             self.faction_bonus_active = True
-        # Actualiza stats si es necesario
         self.update_stats_for_legendary_pet()
 
     def update_stats_for_legendary_pet(self):
@@ -217,28 +216,29 @@ class PlayerStatsUI(Entity):
             color=color.gold
         )
 
-    def update_ui(self):
-        for stat, label in self.text_elements.items():
-            base = self.stats.stats.get(stat, 0)
-            bonus = self.stats.get_bonus(stat)
-            cost = (base + 1) ** 2
-            if bonus > 0:
-                label.text = f"{stat.capitalize()}: {base + bonus} (+{bonus})"
-            else:
-                label.text = f"{stat.capitalize()}: {base}"
-            btn = self.buttons[stat]
-            btn.text = f"+ ({cost})"
-            can_afford = self.gold >= cost
-            btn.color = color.red if not can_afford else color.azure
-            btn.enabled = can_afford
-        self.hp_text.text = f"Vida Máx: {self.stats.max_health}"
-        self.mp_text.text = f"Maná Máx: {self.stats.max_mana}"
-        self.gold_text.text = f"Oro: {self.gold}"
-        # Actualiza botones de habilidades
+    # Modularized UI update logic into smaller methods
+    def update_stat_ui(self, stat, label, btn):
+        base = self.stats.stats.get(stat, 0)
+        bonus = self.stats.get_bonus(stat)
+        cost = (base + 1) ** 2
+        label.text = f"{stat.capitalize()}: {base + bonus} (+{bonus})" if bonus > 0 else f"{stat.capitalize()}: {base}"
+        btn.text = f"+ ({cost})"
+        can_afford = self.gold >= cost
+        btn.color = color.red if not can_afford else color.azure
+        btn.enabled = can_afford
+
+    def update_ability_ui(self):
         for ab, btn in self.ability_buttons.items():
             btn.color = color.azure if ab in self.selected_abilities else color.gray
             btn.enabled = (ab in self.selected_abilities or len(self.selected_abilities) < 2)
-        # Ultimate
+
+    def update_ui(self):
+        for stat, label in self.text_elements.items():
+            self.update_stat_ui(stat, label, self.buttons[stat])
+        self.hp_text.text = f"Vida Máx: {self.stats.max_health}"
+        self.mp_text.text = f"Maná Máx: {self.stats.max_mana}"
+        self.gold_text.text = f"Oro: {self.gold}"
+        self.update_ability_ui()
         if self.ultimate_label:
             faction = getattr(self.player, 'faction', None)
             ultimate = getattr(faction, 'ultimate', 'Ultimate') if faction else 'Ultimate'

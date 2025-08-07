@@ -1,0 +1,42 @@
+MOUNT_DATA = {
+    'burro': {
+        'name': 'Burro',
+        'image_icon': 'assets/mount/burro_icon.png',
+        'image_full': 'assets/mount/burro_full.png',
+        'unlock_level': 1,
+        'base_stats': {'fuerza': 1, 'defensa': 1, 'velocidad': 1},
+        'upgrade_costs': [100 * lvl for lvl in range(1, 41)],
+    },
+    'caballo_comun': {
+        'name': 'Caballo Común',
+        'image_icon': 'assets/mount/caballo_comun_icon.png',
+        'image_full': 'assets/mount/caballo_comun_full.png',
+        'unlock_level': 5,
+        'base_stats': {'fuerza': 10, 'defensa': 8, 'velocidad': 8},
+        'upgrade_costs': [100 * lvl for lvl in range(1, 41)],
+    },
+    'corcel_de_guerra': {
+        'name': 'Corcel de Guerra',
+        'image_icon': 'assets/mount/warhorse_icon.png',
+        'image_full': 'assets/mount/warhorse_full.png',
+        'unlock_level': 20,
+        'base_stats': {'fuerza': 30, 'defensa': 20, 'velocidad': 12},
+        'upgrade_costs': [100 * lvl for lvl in range(1, 41)],
+    },
+    'corcel_real': {
+        'name': 'Corcel Real',
+        'image_icon': 'assets/mount/royal_horse_icon.png',
+        'image_full': 'assets/mount/royal_horse_full.png',
+        'unlock_level': 40,
+        'base_stats': {'fuerza': 60, 'defensa': 40, 'velocidad': 16},
+        'upgrade_costs': [100 * lvl for lvl in range(1, 41)],
+    },
+    'corcel_legendario': {
+        'name': 'Corcel Legendario',
+        'image_icon': 'assets/mount/legendary_horse_icon.png',
+        'image_full': 'assets/mount/legendary_horse_full.png',
+        'unlock_level': 70,
+        'base_stats': {'fuerza': 120, 'defensa': 80, 'velocidad': 20},
+        'upgrade_costs': [100 * lvl for lvl in range(1, 41)],
+    },
+}

@@ -7,6 +7,13 @@ from entities.health_bar import HealthBar
 from ui.virtual_joystick import VirtualJoystick
 from ui.skill_buttons import create_skill_buttons
 
+class Estado:
+    def __init__(self, nombre, duracion, efecto):
+        self.nombre = nombre
+        self.duracion = duracion
+        self.efecto = efecto
+
+# Modificar sistema de daño para incluir resistencias
 class CombatScene(Entity):
     def __init__(self, game, **kwargs):
         super().__init__(parent=scene, **kwargs)
@@ -64,3 +71,8 @@ class CombatScene(Entity):
             destroy(btn)
         # Finalmente, destruir la propia escena
         destroy(self)
+
+    def calcular_daño(self, atacante, defensor, habilidad):
+        daño_base = atacante.ataque * habilidad.modificador
+        resistencia = defensor.resistencias.get(habilidad.tipo, 1.0)
+        return max(1, int(daño_base * resistencia))

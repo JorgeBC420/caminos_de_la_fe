@@ -227,6 +227,11 @@ class MissionManager:
         self.deity_selected = False
 
     def start_next_mission(self):
+        from systems.economy_manager import EconomyManager
+        daily_limit = EconomyManager.get_daily_gold_limit(self.player, source='mission')
+        if hasattr(self.player, 'gold_earned_today') and self.player.gold_earned_today >= daily_limit:
+            print(f'Has alcanzado el límite diario de oro en misiones: {daily_limit} ORO.')
+            return
         if not self.progression_limits.can_start_mission():
             print('Has alcanzado el límite diario de misiones.')
             return
@@ -261,7 +266,12 @@ class MissionManager:
             self.ad_manager.show_popup()
         # Aquí cargas cámara, enemigos, UI, etc.
 
-    def complete_mission(self):
+    def complete_mission(self, gold_reward=0):
         self.current_mission += 1
         self.progression_limits.complete_mission()
+        # Sumar oro ganado hoy solo si es misión (no PvP)
+        if gold_reward > 0:
+            if not hasattr(self.player, 'gold_earned_today'):
+                self.player.gold_earned_today = 0
+            self.player.gold_earned_today += gold_reward
         self.start_next_mission()

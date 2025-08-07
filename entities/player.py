@@ -39,6 +39,9 @@ def create_test_object(position=(2,0,2)):
     obj.on_pickup = on_pickup
     return obj
 
+# Added mount management system
+from systems.mount_manager import MountManager
+
 class Player(Entity):
     def add_fragment(self, fragment_name, amount=1):
         """Agrega fragmentos al inventario del jugador."""
@@ -188,20 +191,50 @@ class Player(Entity):
             ult = ULTIMATE_ABILITIES.get(faction_name)
             if ult and ult['key'] == build['ultimate']:
                 self.abilities[ult['key']] = {**ult, 'ready': True}
-        # ...existing code...
+        # --- Sistema avanzado de niveles y XP ---
+        # --- Centralización de experiencia y nivel ---
+        self.stats = PlayerStats()
+        self.exp_system = ExperienceSystem(self)
+
+        # --- Sistema de cámara en tercera persona ---
+        self.camera_controller = ThirdPersonCamera(self)
+
+        # --- UI de estadísticas (opcional: solo si quieres mostrarla al crear el jugador) ---
+        # self.stats_ui = PlayerStatsUI(self)
+
+        # --- Habilidades ---
+        self.abilities = {
+            'basic_attack': {'cooldown': 0.8, 'ready': True},
+            'ability1': {'cooldown': 5, 'ready': True},
+            'ability2': {'cooldown': 8, 'ready': True},
+            'ultimate': {'cooldown': 30, 'ready': True}
+        }
+
+
+        # --- Integración con sistemas externos ---
+        self.auto_combat = AutoCombatSystem(self)
+        self.faction_war_contribution = 0
+        self.last_contribution_date = None
+        self.auth_token = "example_token"
+        
+        # --- Sistemas de progresión ---
+        from systems.progression import ExperienceSystem, QuestSystem, DailyRewardSystem
+        from inventory.inventory_manager import InventoryManager
+        
+        self.exp_system = ExperienceSystem(self)
+        self.quest_system = QuestSystem(self)
+        self.daily_rewards = DailyRewardSystem(self)
+        self.inventory_manager = InventoryManager(self)
+
+        # Added mount management system
+        self.mount_manager = MountManager(self)
+        self.active_mount_key = 'corcel_de_guerra_aethelgardia'
+        self.state = 'walking'
 
     def create_virtual_joystick(self):
         # Polígono simple para pruebas de joystick
         from ui.virtual_joystick import VirtualJoystick
         return VirtualJoystick(parent=self)
-
-    # --- Sistema avanzado de niveles y XP ---
-    # --- Centralización de experiencia y nivel ---
-    def setup_systems(self):
-        from systems.progression import ExperienceSystem
-        from systems.stats import PlayerStats
-        self.stats = PlayerStats()
-        self.exp_system = ExperienceSystem(self)
 
     @property
     def level(self):
@@ -263,103 +296,60 @@ class Player(Entity):
         self.experience = 0
         print(f"¡Subiste a nivel {self.level}!")
         
-        # --- Sistema de cámara en tercera persona ---
-        self.camera_controller = ThirdPersonCamera(self)
-
-        # --- UI de estadísticas (opcional: solo si quieres mostrarla al crear el jugador) ---
-        # self.stats_ui = PlayerStatsUI(self)
-
-        # --- Habilidades ---
-        self.abilities = {
-            'basic_attack': {'cooldown': 0.8, 'ready': True},
-            'ability1': {'cooldown': 5, 'ready': True},
-            'ability2': {'cooldown': 8, 'ready': True},
-            'ultimate': {'cooldown': 30, 'ready': True}
-        }
-
-
-        # --- Integración con sistemas externos ---
-        self.auto_combat = AutoCombatSystem(self)
-        self.faction_war_contribution = 0
-        self.last_contribution_date = None
-        self.auth_token = "example_token"
-        
-        # --- Sistemas de progresión ---
-        from systems.progression import ExperienceSystem, QuestSystem, DailyRewardSystem
-        from inventory.inventory_manager import InventoryManager
-        
-        self.exp_system = ExperienceSystem(self)
-        self.quest_system = QuestSystem(self)
-        self.daily_rewards = DailyRewardSystem(self)
-        self.inventory_manager = InventoryManager(self)
-
-    # --- Movimiento y combate visual ---
     def update(self):
-        # Actualizar el controlador de cámara
-        if hasattr(self, 'camera_controller'):
-            self.camera_controller.update()
-            
-        # --- Movimiento con física mejorada ---
-        direction = Vec3(0, 0, 0)
-        
-        # Prioridad 1: Joystick Virtual
-        if self.joystick and self.joystick.value.length() > 0:
-            direction = Vec3(self.joystick.value.x, 0, self.joystick.value.y).normalized()
-        # Prioridad 2: Teclas WASD
+        if self.state == 'mounted':
+            direction = Vec3(0, 0, 0)
+            if self.joystick and hasattr(self.joystick, 'value'):
+                direction = Vec3(self.joystick.value.x, 0, self.joystick.value.y).normalized()
+            self.mount_manager.active_mount_instance.position += direction * self.mount_manager.active_mount_instance.speed * time.dt
+            if direction.length() > 0:
+                self.mount_manager.active_mount_instance.look_at(self.mount_manager.active_mount_instance.position + direction)
         else:
-            direction = Vec3(
-                held_keys['d'] - held_keys['a'],
-                0,
-                held_keys['w'] - held_keys['s']
-            ).normalized()
-            
-        # Aplicar movimiento horizontal
-        if direction.length() > 0:
-            # Calcular velocidad basada en stats
-            current_speed = self.speed + (self.stats.get_total_stat('velocidad') * 0.1)
-            self.velocity.x = direction.x * current_speed
-            self.velocity.z = direction.z * current_speed
-            
-            # Rotar hacia la dirección de movimiento
-            target_rotation = math.degrees(math.atan2(direction.x, direction.z))
-            self.rotation_y = lerp(self.rotation_y, target_rotation, time.dt * 10)
-        else:
-            # Frenar gradualmente
-            self.velocity.x = lerp(self.velocity.x, 0, time.dt * 8)
-            self.velocity.z = lerp(self.velocity.z, 0, time.dt * 8)
-            
-        # Aplicar gravedad
-        if not self.on_ground:
-            self.velocity.y += self.gravity * time.dt
-        else:
-            self.velocity.y = max(0, self.velocity.y)
-            
-        # Salto
-        if held_keys['space'] and self.on_ground:
-            self.velocity.y = self.jump_height * 5
-            self.on_ground = False
-            
-        # Aplicar movimiento
-        self.position += self.velocity * time.dt
-        
-        # Verificar si está en el suelo (simplificado)
-        if self.position.y <= 1:  # Asumiendo que el suelo está en y=0 y el jugador mide 2 unidades
-            self.position.y = 1
-            self.on_ground = True
-            self.velocity.y = 0
-        else:
-            self.on_ground = False
-            
-        # Regeneración de maná
-        if self.mana < self.max_mana:
-            mana_regen = 1 + (self.stats.get_total_stat('inteligencia') * 0.1)
-            self.mana = min(self.max_mana, self.mana + mana_regen * time.dt)
+            # Movimiento influenciado por velocidad y agilidad
+            move_speed = self.stats.stats.get('velocidad', 10) * 0.1 + self.stats.stats.get('agilidad', 10) * 0.05
+            direction = Vec3(0, 0, 0)
+            if self.joystick and hasattr(self.joystick, 'value'):
+                direction = Vec3(self.joystick.value.x, 0, self.joystick.value.y).normalized()
+            self.velocity.x = direction.x * move_speed
+            self.velocity.z = direction.z * move_speed
 
+            # Gravedad y salto
+            if not self.is_on_ground:
+                self.velocity.y += self.gravity * time.dt
+            else:
+                self.velocity.y = 0
+
+            # Aplicar movimiento
+            self.position += self.velocity * time.dt
+
+            # Impacto y daño físico
+            self.impact = self.stats.stats.get('fuerza', 10) * 0.2
+            self.attack_damage = self.stats.stats.get('fuerza', 10) * 1.5 + self.stats.stats.get('tecnica', 10) * 0.5
+
+            # Defensa y resistencia a impactos
+            self.defense = self.stats.stats.get('defensa', 10) * 1.2 + self.stats.stats.get('resistencia', 10) * 0.8
+
+            # Precisión y habilidades especiales
+            self.precision = self.stats.stats.get('destreza', 10) * 0.7 + self.stats.stats.get('tecnica', 10) * 0.6
+
+            # Vida máxima y aguante
+            self.max_health = 100 + self.stats.stats.get('resistencia', 10) * 5
+
+            # Maná y habilidades mágicas
+            self.max_mana = 50 + self.stats.stats.get('inteligencia', 10) * 3
+
+            # Colisiones simples (ejemplo)
+            if self.position.y < 0:
+                self.position.y = 0
+                self.is_on_ground = True
+            else:
+                self.is_on_ground = False
     def input(self, key):
-        # Pasar input al controlador de cámara
-        if hasattr(self, 'camera_controller'):
-            self.camera_controller.input(key)
-            
+        if key == 'm':
+            if self.state == 'mounted':
+                self.mount_manager.dismount_player()
+            elif self.state == 'walking':
+                self.mount_manager.summon_mount(self.active_mount_key)
         if key == 'left mouse down':
             if mouse.x > -0.3:
                 if self.can_attack:

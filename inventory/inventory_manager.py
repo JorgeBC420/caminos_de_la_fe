@@ -58,7 +58,8 @@ class InventoryManager:
             'boots': EquipmentSlot('boots'),
             'ring1': EquipmentSlot('ring'),
             'ring2': EquipmentSlot('ring'),
-            'necklace': EquipmentSlot('necklace')
+            'necklace': EquipmentSlot('necklace'),
+            'mount': EquipmentSlot('mount')  # Nuevo slot para montura
         }
         
         # Inicializar con algunos ítems básicos
@@ -118,48 +119,63 @@ class InventoryManager:
         return False
         
     def equip_item(self, item_id):
-        """Equipa un ítem del inventario"""
+        """Equipa un ítem del inventario. Aplica penalización si la montura es de mayor nivel que el jugador."""
+        from data.mount_data import MOUNT_DATA
         item_to_equip = None
         for item in self.items:
             if item.item_id == item_id:
                 item_to_equip = item
                 break
-                
         if not item_to_equip:
             print("Ítem no encontrado en el inventario")
             return False
-            
         # Determinar slot apropiado
         slot_key = None
+        penalty = 0
         if item_to_equip.item_type == 'weapon':
             slot_key = 'weapon'
         elif item_to_equip.item_type in ['helmet', 'chest', 'legs', 'boots', 'necklace']:
             slot_key = item_to_equip.item_type
         elif item_to_equip.item_type == 'ring':
-            # Usar el primer slot de anillo disponible
             if not self.equipment_slots['ring1'].equipped_item:
                 slot_key = 'ring1'
             elif not self.equipment_slots['ring2'].equipped_item:
                 slot_key = 'ring2'
             else:
-                slot_key = 'ring1'  # Reemplazar el primero
-                
+                slot_key = 'ring1'
+        elif item_to_equip.item_type == 'mount':
+            slot_key = 'mount'
+            # Lógica de penalización de montura
+            mount_key = item_to_equip.item_id
+            if mount_key in MOUNT_DATA:
+                unlock_level = MOUNT_DATA[mount_key]['unlock_level']
+                player_level = self.player.level
+                diff = unlock_level - player_level
+                if diff > 0:
+                    if diff >= 30:
+                        penalty = 0.5
+                    elif diff >= 20:
+                        penalty = 0.3
+                    elif diff >= 10:
+                        penalty = 0.25
+                    elif diff >= 5:
+                        penalty = 0.15
+                    elif diff >= 2:
+                        penalty = 0.10
+                self.player.mount_penalty = penalty
+                if penalty > 0:
+                    print(f"Penalización de efectividad: -{int(penalty*100)}% por usar montura de nivel superior.")
+                else:
+                    self.player.mount_penalty = 0
         if slot_key:
             slot = self.equipment_slots[slot_key]
             old_item = slot.equip(item_to_equip)
-            
-            # Quitar del inventario
             self.items.remove(item_to_equip)
-            
-            # Añadir el ítem previamente equipado al inventario
             if old_item:
                 self.add_item(old_item)
-                
-            # Actualizar stats del jugador
             self.update_player_stats()
             print(f"Equipado: {item_to_equip.name}")
             return True
-            
         return False
         
     def unequip_item(self, slot_key):
