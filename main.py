@@ -1,24 +1,4 @@
-from game.mission_system import MissionSystem
 
-# Ejemplo: mostrar narrativa y diálogos de la misión 1 del Acto II
-mission = MissionSystem(act='act2', chapter_idx=0)
-mission.show_intro()
-# ... aquí iría la lógica de combate/calabozo ...
-# Si hay NPC relevante, mostrar diálogo
-mission = MissionSystem(act='act2', chapter_idx=1)
-mission.show_dialogue('kareem')
-# ... lógica de misión ...
-# Al finalizar la misión
-mission.show_outro()
-from game.mission_manager import MissionManager
-
-# Suponiendo que la facción se elige antes
-faccion = 'Vikingos'  # Cambia según la selección del jugador
-manager = MissionManager(faccion)
-manager.start_next_mission()
-
-# Al completar cada misión, llama:
-# manager.complete_mission()
 from ursina import *
 
 # CAMBIO: Importamos las escenas que vamos a gestionar
@@ -187,7 +167,7 @@ class Game:
         self.ui_manager.show_profile()
 
     # CAMBIO: Añadimos el método para iniciar la escena de combate
-    def start_combat_scene():
+    def start_combat_scene(self):
         print("Iniciando escena de combate...")
         # Aquí iría la lógica para iniciar la escena de combate
 
@@ -270,68 +250,18 @@ def select_deity(deity):
     player.ultimate = deity['ultimate']
     player.ultimate_desc = deity['ultimate_desc']
     player.moral = 0  # Moral/fe inicial
-    start_combat_scene()
+    # Llama a la escena de combate desde la instancia de Game si está disponible
+    if 'game' in globals() and hasattr(game, 'start_combat_scene'):
+        game.start_combat_scene()
+    else:
+        print("No se pudo iniciar la escena de combate: instancia de Game no encontrada.")
 
 # Ejemplo de uso
 if __name__ == "__main__":
-    app = Ursina()
-    game = GameWorld(world_id="holy_land")
-    game.join_holy_war()
-    game.switch_world("europe")
-    app.run()
+    game = Game()
+    game.run()
 
 # En la UI de combate, solo permite activar ultimate si player.moral >= 500
 # Ejemplo de lógica para el botón de ultimate:
-def activate_ultimate():
 
-# Corrección de la función `complete_epic_mission`
-def complete_epic_mission(mission):
-    print(f"Completando misión épica: {mission}")
-    # Lógica para completar la misión épica
-    if hasattr(mission, 'complete'):
-        mission.complete()
-        print(f"Misión {mission.name} completada con éxito.")
-    else:
-        print("Error: La misión no tiene un método 'complete'.")
-# Definición de `start_combat_scene` para evitar errores
-
-def start_combat_scene():
-    print("Iniciando escena de combate...")
-    # Aquí iría la lógica para iniciar la escena de combate
-
-# Lógica para completar misión épica y otorgar fragmentos
-def complete_epic_mission(mission):
-    global player
-    player.complete_epic_mission(mission)
-    print(f"Has completado la misión épica: {mission['name']} y recibido {mission['reward']}")
-    global player
-    if player.moral >= 500:
-        print(f"Activando ultimate: {player.ultimate}")
-        # Aquí iría la animación y efecto visual
-        invoke(show_ultimate_effect, player.ultimate)
-        player.moral -= 500  # Consume moral/fe
-    else:
-        print("No tienes suficiente fe/moral para activar la ultimate.")
-
-def show_ultimate_effect(ultimate_name):
-    # Aquí puedes crear entidades visuales y efectos según el ultimate
-    print(f"Efecto visual de {ultimate_name}")
-
-def show_combat_ui():
-    global player_health_bar, enemy_health_bar, ability_buttons
-    # ...existing code...
-    ability_buttons = []
-    skill_names = ['Curación', 'Daño en área', 'Ultimate']
-    default_font = 'VeraMono.ttf'  # Usa una fuente estándar de Ursina
-    for i, skill in enumerate(skill_names):
-        btn = Button(
-            text=skill if i < 2 else 'Ultimate',
-            y=-0.4,
-            x=0.3 + i * 0.2,
-            scale=(0.15, 0.08),
-            color=color.gray if i < 2 else color.orange,
-            font=default_font,
-            on_click=Func(player.activate_skill, skill)
-        )
-        ability_buttons.append(btn)
-    # ...existing code...
+# --- Eliminar duplicados y funciones sueltas ---
