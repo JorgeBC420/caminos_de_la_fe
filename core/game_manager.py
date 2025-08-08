@@ -37,17 +37,18 @@ class Game:
         """Load the ProfileScene for the player profile."""
         self.switch_scene(ProfileScene(self.player))
 
-    def mission_complete(self, result):
-        """Handle mission completion and reward the player.
-
-        Args:
-            result: Dictionary containing mission results (experience, loot).
-        """
+    def mission_complete(self, mission_data):
+        """Handle mission completion, show rewards, and return to map scene."""
         if not self.player:
             raise ValueError("Player is not initialized.")
-        self.player.progression.add_experience(result['experience'])
-        self.player.inventory.add_items(result['loot'])
-        self.load_map_scene()
+        rewards = mission_data.get('rewards', {})
+        self.player.progression.add_experience(rewards.get('xp', 0))
+        self.player.inventory.add_items(rewards.get('items', []))
+        self.player.gold += rewards.get('gold', 0)
+        from ui.rewards_ui import RewardsUI
+        def continue_to_map():
+            self.load_map_scene()
+        RewardsUI(rewards, continue_to_map)
 
     def quit_game(self):
         # Lógica para salir del juego

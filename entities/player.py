@@ -126,14 +126,37 @@ class Player(Entity):
         self.velocity.x = direction.x * move_speed
         self.velocity.z = direction.z * move_speed
 
-        # Gravedad y salto
-        if not self.is_on_ground:
-            self.velocity.y += self.gravity * time.dt
+        # Evasión (dash)
+        if hasattr(self, 'evade_cooldown') and self.evade_cooldown > 0:
+            self.evade_cooldown -= time.dt
+        if hasattr(self, 'is_evading') and self.is_evading:
+            # Movimiento rápido en la dirección actual
+            self.position += self.evade_direction * self.evade_speed * time.dt
+            self.evade_time -= time.dt
+            if self.evade_time <= 0:
+                self.is_evading = False
         else:
-            self.velocity.y = 0
-
-        # Aplicar movimiento
-        self.position += self.velocity * time.dt
+            # Gravedad normal
+            if not self.is_on_ground:
+                self.velocity.y += self.gravity * time.dt
+            else:
+                self.velocity.y = 0
+            self.position += self.velocity * time.dt
+    def evade(self, direction=None):
+        """Realiza una evasión rápida (dash) en la dirección indicada."""
+        if hasattr(self, 'evade_cooldown') and self.evade_cooldown > 0:
+            print("Evasión en cooldown")
+            return
+        self.is_evading = True
+        self.evade_time = 0.25  # Duración del dash
+        self.evade_speed = 18   # Velocidad del dash
+        self.evade_cooldown = 1.0  # Cooldown en segundos
+        if direction is None:
+            # Por defecto, evade hacia adelante
+            direction = self.forward
+        self.evade_direction = direction.normalized()
+        Entity(model='cube', color=color.cyan, scale=0.3, position=self.position + self.evade_direction, duration=0.2)
+        print("¡Evasión!")
 
         # Impacto y daño físico
         self.impact = self.stats.stats.get('fuerza', 10) * 0.2

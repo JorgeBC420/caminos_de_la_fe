@@ -9,9 +9,12 @@ class MissionManager:
         self.available_side_quests = []
         self.active_mission_data = None
 
-    def get_main_missions(self):
-        # Carga las misiones principales desde archivos JSON por facción
-        return load_mission_json(self.player_faction)
+
+    def load_mission(self, mission_id):
+        """
+        Carga una misión individual desde data/missions/{mission_id}.json
+        """
+        return load_mission_json(mission_id)
 
     def get_side_quests(self):
         return self.available_side_quests

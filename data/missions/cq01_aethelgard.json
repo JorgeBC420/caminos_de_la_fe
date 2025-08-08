@@ -1,0 +1,14 @@
+{
+    "id": "cq01_aethelgard",
+    "name": "Defiende Aethelgard",
+    "description": "Los lobos atacan la aldea de Aethelgard. Derrota a los lobos y protege a los aldeanos.",
+    "objectives": [
+        {"type": "defeat", "target": "lobo", "count": 5}
+    ],
+    "rewards": {
+        "xp": 100,
+        "gold": 50,
+        "items": ["pocion_curacion"]
+    },
+    "next_mission": "cq02_bosqueoscuro"
+}

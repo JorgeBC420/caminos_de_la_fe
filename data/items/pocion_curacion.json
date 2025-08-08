@@ -1,0 +1,9 @@
+{
+    "id": "pocion_curacion",
+    "name": "Poción de Curación",
+    "type": "consumable",
+    "effect": {
+        "type": "heal",
+        "amount": 50
+    }
+}

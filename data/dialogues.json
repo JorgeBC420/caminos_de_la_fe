@@ -1,0 +1,10 @@
+{
+    "npc_heroe": [
+        {"text": "¡Bienvenido, viajero! ¿Buscas gloria o redención?"},
+        {"text": "La fe es tu mejor arma en estas tierras."}
+    ],
+    "npc_herrero": [
+        {"text": "¿Tienes materiales? Puedo forjarte algo especial."},
+        {"text": "Recuerda: el mejor acero se templa en el fuego de la batalla."}
+    ]
+}

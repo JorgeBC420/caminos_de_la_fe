@@ -30,13 +30,29 @@ class BrotherhoodUI(Entity):
 
     def show_members_tab(self):
         self._clear_content()
-        Text(parent=self.content_area, text="Lista de Miembros", y=0.3)
-        # ... Lógica para obtener y mostrar la lista de miembros del clan desde el backend
+        from systems.brotherhood_manager import BrotherhoodManager
+        manager = BrotherhoodManager(api_client=None, player=self.player)
+        data = manager.fetch_brotherhood_data()
+        Text(parent=self.content_area, text=f"Miembros de {data['name']}", y=0.3)
+        y = 0.15
+        for m in data['members']:
+            Text(parent=self.content_area, text=f"{m['name']} ({m['role']}) Lv.{m['level']}", y=y, scale=1.2)
+            y -= 0.08
 
     def show_treasury_tab(self):
         self._clear_content()
-        Text(parent=self.content_area, text="Tesorería de la Hermandad", y=0.3)
-        # ... Lógica para mostrar oro, recursos y permitir donaciones
+        from systems.brotherhood_manager import BrotherhoodManager
+        manager = BrotherhoodManager(api_client=None, player=self.player)
+        data = manager.fetch_brotherhood_data()
+        Text(parent=self.content_area, text=f"Oro: {data['treasury']['gold']} | Recursos: {data['treasury']['resources']}", y=0.3)
+        input_gold = InputField(parent=self.content_area, y=0.1, scale=(0.3,0.07), default_value='100')
+        def donate():
+            amount = int(input_gold.text)
+            if manager.donate_gold(amount):
+                Text(parent=self.content_area, text=f"¡Donaste {amount} de oro!", y=-0.1, color=color.lime, scale=1.2)
+            else:
+                Text(parent=self.content_area, text="No tienes suficiente oro.", y=-0.1, color=color.red, scale=1.2)
+        Button(parent=self.content_area, text="Donar", y=-0.05, on_click=donate)
 
     def show_chancellery_tab(self):
         self._clear_content()

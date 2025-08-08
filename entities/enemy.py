@@ -2,8 +2,10 @@ from ursina import *
 from data.config import GameConfig
 
 class Enemy(Entity):
-    def __init__(self, position, target, **kwargs):
+    def __init__(self, position, target, owner_scene=None, enemy_id=None, **kwargs):
         super().__init__(**kwargs)
+        self.owner_scene = owner_scene
+        self.enemy_id = enemy_id or 'enemy'
         try:
             self.model = load_model('Soldado SARRACENO.fbx')
         except Exception as e:
@@ -35,6 +37,8 @@ class Enemy(Entity):
 
     def die(self):
         print("Enemigo derrotado!")
+        if self.owner_scene and hasattr(self.owner_scene, 'on_enemy_defeated'):
+            self.owner_scene.on_enemy_defeated(self)
         if self.target and hasattr(self.target, 'add_experience'):
             self.target.add_experience(self.xp_value)
             # Lógica de loot simple
